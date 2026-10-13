@@ -12,7 +12,7 @@ namespace Compass;
 public static class Settings
 {
     private static MelonPreferences_Entry<float> _maxDistanceFt, _fadeStartFt, _minAlpha, _facingAngle, _chevronThresholdFt, _chevronSize;
-    private static MelonPreferences_Entry<float> _overlayMaxFt, _dealerOverlayMaxFt, _playerOverlayMaxFt, _overlayFadeInFt, _overlayFadeStartFt, _overlayFadeEndFt, _overlayHeightFt,
+    private static MelonPreferences_Entry<float> _overlayMaxFt, _dealerOverlayMaxFt, _playerOverlayMaxFt, _dealerLowStock, _overlayFadeInFt, _overlayFadeStartFt, _overlayFadeEndFt, _overlayHeightFt,
         _overlaySize, _overlayOpacity, _overlayLookRadius, _overlayNameOpacity, _overlayNameScale;
     private static MelonPreferences_Entry<bool> _overlayQuestsOnly, _overlayShowNames, _debugLogging, _showPlayers, _playersOnOverlay, _showDealers, _dealersOnOverlay;
 
@@ -37,6 +37,8 @@ public static class Settings
     public static bool DealersOnOverlay => _dealersOnOverlay.Value;
     /// <summary>Through-wall icons for dealers / co-op partners appear within these many feet.</summary>
     public static float DealerOverlayMaxFt => _dealerOverlayMaxFt.Value;
+    /// <summary>A dealer carrying at least this many units of product is shown green; fewer shades toward red.</summary>
+    public static float DealerLowStock => _dealerLowStock.Value;
     public static float PlayerOverlayMaxFt => _playerOverlayMaxFt.Value;
     public static bool DebugLogging => _debugLogging.Value;
 
@@ -81,6 +83,7 @@ public static class Settings
         _playersOnOverlay = pl.CreateEntry("PlayersOnOverlay", false, "Show players through walls", "Show an icon above co-op partners within the overlay distance, even through walls.");
 
         _playerOverlayMaxFt = Float(pl, "PlayerOverlayMaxFt", 150f, "Players: show within (ft)", "Through-wall icons for co-op partners appear within this distance.", 10f, 1000f);
+        _dealerLowStock = Float(pl, "DealerLowStock", 10f, "Dealers: well stocked at (units)", "A dealer carrying at least this many units of product is shown green; with fewer the frame shades toward red, fully red when empty.", 1f, 200f);
         _showDealers = pl.CreateEntry("ShowDealers", true, "Show dealers on compass", "Show your recruited dealers on the compass.");
         _dealersOnOverlay = pl.CreateEntry("DealersOnOverlay", false, "Show dealers through walls", "Show an icon above your recruited dealers within the overlay distance, even through walls.");
 

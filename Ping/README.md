@@ -12,7 +12,7 @@ To install by hand you need: MelonLoader 0.7.3, `Compass-IL2CPP.dll` and `Ping-I
 Everyone who should see each other's pings needs the mods installed. Players without them are not affected and simply do not see pings.
 
 ## Settings
-In `UserData/MelonPreferences.cfg` under `[Ping]`, or in-game with the Mods App: ping key, duration, max distance, cooldown, volume, and whether pings show on the compass and/or in the world.
+In `UserData/MelonPreferences.cfg` under `[Ping]`, or in-game with the [Mods App](https://thunderstore.io/c/schedule-i/p/k0Mods/ModsApp/) (needs S1API): ping key, duration, max distance, cooldown, volume, and whether pings show on the compass and/or in the world.
 
 ## Notes
 - Default (IL2CPP) Steam branch only. Tested on game version 0.4.7f12.

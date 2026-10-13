@@ -14,7 +14,11 @@ Vanilla+ quality-of-life mods for [Schedule I](https://store.steampowered.com/ap
 Download from [Releases](https://github.com/ryanf9802/s1-vanilla-plus/releases) (MelonLoader 0.7.3 required):
 
 - **All mods:** `S1VanillaPlus-<version>.zip`. Extract it into the game folder; it puts every mod's DLL in `Mods/`.
-- **One mod:** `<PackageName>-<version>.zip` (for example `CompassPlus-0.2.0.zip`); copy its DLL into `Mods/`. If a mod depends on another (Ping needs Compass+ and the SteamNetworkLib library), install those too. The all-in-one zip always has everything it needs.
+- **One mod:** `<PackageName>-<version>.zip` (for example `CompassPlus-0.2.0.zip`); copy its DLL into `Mods/`. If a mod depends on another (Ping needs Compass+ and the SteamNetworkLib library), install those too. The all-in-one zip always has everything it needs, except the optional [Mods App](https://thunderstore.io/c/schedule-i/p/k0Mods/ModsApp/) for in-game settings (see Configuring below).
+
+## Configuring
+
+Settings live in `UserData/MelonPreferences.cfg`. For in-game sliders and toggles, also install the [Mods App](https://thunderstore.io/c/schedule-i/p/k0Mods/ModsApp/) (by k0Mods, source at [k073l/s1-modsapp](https://github.com/k073l/s1-modsapp)). It adds a phone app that lists every setting of Compass+ and Ping with names and ranges, and changes apply immediately. It needs S1API, which the Mods App page links to. Both mods work without it.
 
 ## Building
 

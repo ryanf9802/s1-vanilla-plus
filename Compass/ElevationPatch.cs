@@ -9,7 +9,7 @@ namespace Compass;
 /// marker you are facing (vanilla only labels markers within DISTANCE_LABEL_THRESHOLD), and appends the
 /// height difference to the label.
 /// </summary>
-[HarmonyPatch(typeof(CompassManager), nameof(CompassManager.UpdateElement))]
+[HarmonyPatch(typeof(CompassManager), nameof(CompassManager.LateUpdate))]
 public static class ElevationPatch
 {
     private const float FeetPerUnit = 3.28084f; // vanilla labels are in feet
@@ -17,12 +17,38 @@ public static class ElevationPatch
     private static bool _errorLogged;
     public static int Calls, Applied, Failed;
 
-    public static void Postfix(CompassManager.Element element)
+    public static int HarmonyFrames, FallbackFrames;
+    private static int _lastFrame = -1;
+
+    /// <summary>Unity invokes LateUpdate itself, so this hook fires every frame (the per-element UpdateElement is called from native code and bypasses hooks).</summary>
+    public static void Postfix()
+    {
+        if (!ApplyAll()) return;
+        HarmonyFrames++;
+    }
+
+    /// <summary>Fallback entry point from MelonMod.OnLateUpdate; does nothing if the Harmony hook already ran this frame.</summary>
+    public static void Fallback()
+    {
+        if (ApplyAll()) FallbackFrames++;
+    }
+
+    private static bool ApplyAll()
+    {
+        int frame = Time.frameCount;
+        if (frame == _lastFrame) return false;
+        _lastFrame = frame;
+        var cm = CompassManager.Instance;
+        if (cm == null || cm.elements == null) return true;
+        foreach (var el in cm.elements) Apply(cm, el);
+        return true;
+    }
+
+    private static void Apply(CompassManager cm, CompassManager.Element element)
     {
         Calls++;
         try
         {
-            var cm = CompassManager.Instance;
             var target = element?.TargetTransform;
             // CompassManager.cam is a game-side property that throws from inside this hook; use the main camera.
             var cam = Camera.main != null ? Camera.main.transform : null;

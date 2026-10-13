@@ -65,6 +65,7 @@ public static class CompassEnhancer
 
         Overlay.BeginFrame();
         try { PlayerMarkers.Tick(); } catch (System.Exception e) { ReportError("PlayerMarkers", e); }
+        try { DealerMarkers.Tick(); } catch (System.Exception e) { ReportError("DealerMarkers", e); }
         try { CompassApi.Tick(cm); } catch (System.Exception e) { ReportError("CompassApi", e); }
 
         // Pass 1: among markers you are facing, pick the one that gets a label (closest wins).
@@ -91,6 +92,7 @@ public static class CompassEnhancer
         _lastWinner = -1;
         CompassApi.Reset();
         PlayerMarkers.Reset();
+        DealerMarkers.Reset();
         Overlay.Reset();
     }
 

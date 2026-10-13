@@ -11,6 +11,8 @@ public enum MarkerIcon
     Pin,
     /// <summary>A disc with a person silhouette: a player.</summary>
     Person,
+    /// <summary>A disc with a small sack: a dealer.</summary>
+    Dealer,
 }
 
 /// <summary>Handle to a marker added through <see cref="CompassApi.AddMarker"/>.</summary>
@@ -136,24 +138,23 @@ public static class CompassApi
         ByTarget.Clear();
         try { if (_templateHolder != null) UnityEngine.Object.Destroy(_templateHolder); } catch { }
         _templateHolder = null;
-        _pinTemplate = _personTemplate = null;
-        _pinSprite = _dotSprite = _discSprite = _personSprite = null;
+        _templates.Clear();
+        _pinSprite = _dotSprite = _discSprite = _personSprite = _bagSprite = null;
     }
 
-    private static Transform _pinTemplate, _personTemplate;
-    private static Sprite _pinSprite, _dotSprite, _discSprite, _personSprite;
+    private static readonly System.Collections.Generic.Dictionary<MarkerIcon, Transform> _templates = new();
+    private static Sprite _pinSprite, _dotSprite, _discSprite, _personSprite, _bagSprite;
 
-    private static string TintName(MarkerIcon icon) => icon == MarkerIcon.Person ? "PlayerDisc" : "PingPin";
+    private static string TintName(MarkerIcon icon) => icon switch { MarkerIcon.Person => "PlayerDisc", MarkerIcon.Dealer => "DealerDisc", _ => "PingPin" };
 
     private static Transform GetTemplate(MarkerIcon icon)
     {
-        if (icon == MarkerIcon.Person)
+        if (!_templates.TryGetValue(icon, out var t) || t == null)
         {
-            if (_personTemplate == null) _personTemplate = BuildTemplate(icon);
-            return _personTemplate;
+            t = BuildTemplate(icon);
+            _templates[icon] = t;
         }
-        if (_pinTemplate == null) _pinTemplate = BuildTemplate(icon);
-        return _pinTemplate;
+        return t;
     }
 
     /// <summary>
@@ -175,7 +176,7 @@ public static class CompassApi
             _templateHolder = new GameObject("CompassMarkerTemplates");
             _templateHolder.SetActive(false); // keeps the prefab itself off screen; clones copy its own active state
         }
-        var go = new GameObject(icon == MarkerIcon.Person ? "PlayerIcon" : "PingIcon");
+        var go = new GameObject(icon + "Icon");
         var root = go.AddComponent<RectTransform>();
         root.SetParent(_templateHolder.transform, false);
         root.anchorMin = root.anchorMax = root.pivot = new Vector2(0.5f, 0.5f);
@@ -183,7 +184,7 @@ public static class CompassApi
         go.SetActive(true);
         MelonLoader.MelonLogger.Msg($"[Compass] built {icon} marker template ({size.x:0}x{size.y:0})");
 
-        bool person = icon == MarkerIcon.Person;
+        bool person = icon != MarkerIcon.Pin; // person and dealer icons are a disc with a glyph; the ping is a pin with a dot
         var shape = new GameObject(TintName(icon));
         var sr = shape.AddComponent<RectTransform>();
         sr.SetParent(go.transform, false);
@@ -196,7 +197,7 @@ public static class CompassApi
         shapeImg.preserveAspect = true;
         shapeImg.raycastTarget = false;
 
-        var glyph = new GameObject(person ? "PlayerGlyph" : "PingDot");
+        var glyph = new GameObject(person ? icon + "Glyph" : "PingDot");
         var gr = glyph.AddComponent<RectTransform>();
         gr.SetParent(sr, false);
         if (person)
@@ -212,7 +213,7 @@ public static class CompassApi
             gr.sizeDelta = new Vector2(PinSize * PinDotRadius * 2f, PinSize * PinDotRadius * 2f);
         }
         var glyphImg = glyph.AddComponent<Image>();
-        glyphImg.sprite = person ? GetPersonSprite() : GetDotSprite();
+        glyphImg.sprite = icon == MarkerIcon.Person ? GetPersonSprite() : icon == MarkerIcon.Dealer ? GetBagSprite() : GetDotSprite();
         glyphImg.raycastTarget = false;
         gr.localScale = Vector3.one;
         return go.transform;
@@ -305,6 +306,34 @@ public static class CompassApi
             }
         tex.Apply();
         return _personSprite = MakeSprite(tex);
+    }
+
+    /// <summary>A white sack (body, neck and flared top) that sits inside the disc.</summary>
+    private static Sprite GetBagSprite()
+    {
+        if (_bagSprite != null) return _bagSprite;
+        const int n = 64, ss = 3;
+        var tex = NewTexture(n);
+        for (int y = 0; y < n; y++)
+            for (int x = 0; x < n; x++)
+            {
+                int hits = 0;
+                for (int sy = 0; sy < ss; sy++)
+                    for (int sx = 0; sx < ss; sx++)
+                    {
+                        float qx = (x + (sx + 0.5f) / ss) / n, qy = (y + (sy + 0.5f) / ss) / n;
+                        // body: a rounded block; neck: narrow; top: a small flare
+                        float cx = Mathf.Abs(qx - 0.5f);
+                        bool body = cx <= 0.21f && qy >= 0.24f && qy <= 0.58f
+                                    && !(cx > 0.17f && (qy < 0.28f || qy > 0.54f)); // rounded corners
+                        bool neck = cx <= 0.07f && qy > 0.58f && qy <= 0.68f;
+                        bool top = cx <= 0.16f && qy > 0.68f && qy <= 0.76f;
+                        if (body || neck || top) hits++;
+                    }
+                tex.SetPixel(x, y, new Color(1f, 1f, 1f, hits / (float)(ss * ss)));
+            }
+        tex.Apply();
+        return _bagSprite = MakeSprite(tex);
     }
 
     private static Texture2D NewTexture(int n)

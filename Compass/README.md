@@ -8,6 +8,7 @@ A "vanilla+" upgrade to Schedule I's compass. Everything uses the game's own fon
 - **Elevation chevron:** a small up or down chevron after the distance tells you the target is 10 ft or more above or below you.
 - **Through-wall marker icons:** anything shown on the compass (quest objectives, landmarks, NPCs) within 50 ft gets its own icon floating above it, visible through walls. Icons ease in as you approach and fade out as you reach the marker. Look at an icon and its name appears underneath.
 - **Co-op partners on the compass:** every other player in your game gets a marker in their own color (a disc with a person silhouette), plus, if you turn on `PlayersOnOverlay`, an icon above them through walls when they are close. Colors are the same for everyone and match that player's pings if you also run Ping. Nothing is synced: it reads the player list the game already has.
+- **Your dealers on the compass:** every dealer you have recruited gets a marker (a green disc with a small sack), so you can find where they are. Optionally also an icon above them through walls (off by default).
 - **Everything is configurable**: see below.
 
 ## Installation
@@ -18,7 +19,7 @@ A "vanilla+" upgrade to Schedule I's compass. Everything uses the game's own fon
 Only the default (IL2CPP) Steam branch is supported. The alternate/Mono branch is not.
 
 ## Settings
-Settings live in `UserData/MelonPreferences.cfg` under `[Compass]`, `[Compass_Players]` and `[Compass_Overlay]`, and apply the next time you launch the game. For in-game sliders and toggles, install the [Mods App](https://thunderstore.io/c/schedule-i/p/k0Mods/ModsApp/) (it needs the S1API fork); changes made there apply immediately.
+Settings live in `UserData/MelonPreferences.cfg` under `[Compass]`, `[Compass_Players]` (partners and dealers) and `[Compass_Overlay]`, and apply the next time you launch the game. For in-game sliders and toggles, install the [Mods App](https://thunderstore.io/c/schedule-i/p/k0Mods/ModsApp/) (it needs the S1API fork); changes made there apply immediately.
 
 | Setting | Default | Meaning |
 |---|---|---|
@@ -28,6 +29,7 @@ Settings live in `UserData/MelonPreferences.cfg` under `[Compass]`, `[Compass_Pl
 | `FacingAngle` | 6 | Degrees from straight ahead that count as "facing" a marker |
 | `ChevronThresholdFt` / `ChevronSize` | 10 / 8 | When the elevation chevron shows, and its size |
 | `ShowPlayers` / `PlayersOnOverlay` | on / off | Co-op partners on the compass strip / through walls |
+| `ShowDealers` / `DealersOnOverlay` | on / off | Your recruited dealers on the compass strip / through walls |
 | `OverlayMaxFt` | 50 | Overlay icons appear within this distance |
 | `OverlayFadeInFt` | 16.4 | Icons fade in over this distance (5 m) |
 | `OverlayFadeStartFt` / `OverlayFadeEndFt` | 6 / 2 | Icons fade out between these distances |

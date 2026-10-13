@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.2.0
 - Pings now land on distant buildings. The game turns building colliders off at range, so the ping also tests those disabled colliders.
 - Directional ping sound: pans toward the ping's side of your view and is muffled when the ping is behind you (`Directional` setting).
 

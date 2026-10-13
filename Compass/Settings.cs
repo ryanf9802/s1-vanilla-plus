@@ -5,7 +5,8 @@ namespace Compass;
 /// <summary>User-tweakable options, stored in UserData/MelonPreferences.cfg under [Compass].</summary>
 public static class Settings
 {
-    private static MelonPreferences_Entry<float> _fadeStartFt, _maxDistanceFt, _minAlpha, _facingAngle, _chevronThresholdFt, _chevronSize;
+    private static MelonPreferences_Entry<float> _fadeStartFt, _maxDistanceFt, _minAlpha, _facingAngle, _chevronThresholdFt, _chevronSize,
+        _overlayMaxFt, _overlayFadeStartFt, _overlayFadeEndFt, _overlayHeightFt, _overlaySize;
 
     /// <summary>Markers closer than this many feet are fully opaque.</summary>
     public static float FadeStartFt => _fadeStartFt.Value;
@@ -18,6 +19,17 @@ public static class Settings
     public static float ChevronThresholdFt => _chevronThresholdFt.Value;
     public static float ChevronSize => _chevronSize.Value;
 
+    // Overlay icons (quest objectives now, pings later); all distances in feet.
+    /// <summary>Overlay icons appear within this many feet.</summary>
+    public static float OverlayMaxFt => _overlayMaxFt.Value;
+    /// <summary>Icons are fully opaque farther than this, and start fading out as you get closer.</summary>
+    public static float OverlayFadeStartFt => _overlayFadeStartFt.Value;
+    /// <summary>Icons are fully invisible at or closer than this.</summary>
+    public static float OverlayFadeEndFt => _overlayFadeEndFt.Value;
+    /// <summary>How far above the target the icon floats.</summary>
+    public static float OverlayHeightFt => _overlayHeightFt.Value;
+    public static float OverlaySize => _overlaySize.Value;
+
     public static void Init()
     {
         var c = MelonPreferences.CreateCategory("Compass");
@@ -26,6 +38,11 @@ public static class Settings
         _minAlpha = c.CreateEntry("MinAlpha", 0.25f, description: "Opacity of markers at MaxDistanceFt (0-1)");
         _facingAngle = c.CreateEntry("FacingAngle", 6f, description: "Show distance only for markers within this many degrees of straight ahead");
         _chevronThresholdFt = c.CreateEntry("ChevronThresholdFt", 10f, description: "Show an up/down chevron when the target is at least this many feet above/below you");
+        _overlayMaxFt = c.CreateEntry("OverlayMaxFt", 50f, description: "Overlay icons (quest objectives) show within this many feet");
+        _overlayFadeStartFt = c.CreateEntry("OverlayFadeStartFt", 6f, description: "Overlay icons start fading out when closer than this many feet");
+        _overlayFadeEndFt = c.CreateEntry("OverlayFadeEndFt", 2f, description: "Overlay icons are fully invisible at this many feet or closer");
+        _overlayHeightFt = c.CreateEntry("OverlayHeightFt", 6.5f, description: "How many feet above the target the overlay icon floats");
+        _overlaySize = c.CreateEntry("OverlaySize", 28f, description: "Overlay icon size in UI pixels");
         _chevronSize = c.CreateEntry("ChevronSize", 8f, description: "Chevron size in UI pixels");
     }
 }

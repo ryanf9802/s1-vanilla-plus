@@ -20,6 +20,9 @@ public static class CompassEnhancer
         public RectTransform Rect;
         public Image Chevron;
         public RectTransform ChevronRect;
+        public Image Icon;          // the vanilla marker icon, reused for the overlay
+        public bool IsQuest;
+        public bool IconSearched;
         public readonly System.Collections.Generic.List<CanvasGroup> Groups = new();
     }
 
@@ -36,12 +39,14 @@ public static class CompassEnhancer
         if (cm == null || cm.elements == null || cam == null) return;
         var camT = cam.transform;
 
+        Overlay.BeginFrame();
+
         // Pass 1: among markers you are facing, pick the one that gets a label (closest wins).
         int winner = PickLabelWinner(camT, cm);
         // Pass 2: apply visuals.
         foreach (var el in cm.elements)
         {
-            try { Apply(camT, el, winner); }
+            try { Apply(cm, camT, el, winner); }
             catch (System.Exception e)
             {
                 Failed++;
@@ -49,6 +54,13 @@ public static class CompassEnhancer
                 _errorLogged = true;
                 MelonLoader.MelonLogger.Error($"[Compass] CompassEnhancer failed (logged once): {e}");
             }
+        }
+
+        try { Overlay.Render(cm.Canvas, cam); }
+        catch (System.Exception e)
+        {
+            Failed++;
+            if (!_errorLogged) { _errorLogged = true; MelonLoader.MelonLogger.Error($"[Compass] Overlay failed (logged once): {e}"); }
         }
     }
 
@@ -85,7 +97,7 @@ public static class CompassEnhancer
         return best;
     }
 
-    private static void Apply(Transform camT, CompassManager.Element el, int labelWinner)
+    private static void Apply(CompassManager cm, Transform camT, CompassManager.Element el, int labelWinner)
     {
         var target = el?.TargetTransform;
         var rect = el?.Rect;
@@ -103,6 +115,11 @@ public static class CompassEnhancer
             ? Mathf.Lerp(1f, Settings.MinAlpha, Mathf.InverseLerp(Settings.FadeStartFt, Settings.MaxDistanceFt, distFt))
             : 0f;
         foreach (var g in entry.Groups) if (g != null) g.alpha = fade;
+
+        // Overlay: quest objectives (named like "(3) Go to Gas-Mart (Inactive)") get an icon above them in the world.
+        if (!entry.IconSearched) FindIcon(entry, rect, target);
+        if (entry.IsQuest && entry.Icon != null && cm.CompassEnabled)
+            Overlay.Submit(target.position, entry.Icon.sprite, entry.Icon.color);
 
         // Label: only on the closest marker you are facing (horizontal angle, so looking up/down still counts).
         var label = el.DistanceLabel;
@@ -135,6 +152,17 @@ public static class CompassEnhancer
                 entry.Chevron.color = new Color(1f, 1f, 1f, 0.9f * label.alpha);
             }
         }
+    }
+
+    private static void FindIcon(Entry entry, RectTransform rect, Transform target)
+    {
+        entry.IconSearched = true;
+        string n = target.name ?? "";
+        entry.IsQuest = n.Length > 2 && n[0] == '(' && char.IsDigit(n[1]);
+        if (!entry.IsQuest) return;
+        var iconT = rect.Find("QuestIcon(Clone)");
+        entry.Icon = iconT != null ? iconT.GetComponentInChildren<Image>() : null;
+        MelonLoader.MelonLogger.Msg($"[Compass] quest marker '{n}' icon={(entry.Icon != null ? entry.Icon.name : "none")}");
     }
 
     private static Entry GetEntry(RectTransform rect, Il2CppTMPro.TMP_Text label)

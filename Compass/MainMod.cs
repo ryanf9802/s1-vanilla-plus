@@ -71,7 +71,7 @@ public class Compass : MelonMod
         if (cm == null) { Logger.Msg("[probe] CompassManager.Instance is null"); return; }
         var camPos = cm.cam != null ? cm.cam.position : Vector3.zero;
         Logger.Msg($"[probe] enabled={cm.CompassEnabled} range={cm.CompassUIRange} fullAlphaRange={cm.FullAlphaRange} angleDiv={cm.AngleDivisor} " +
-                   $"labelThreshold={CompassManager.DISTANCE_LABEL_THRESHOLD} notches={CompassManager.NOTCH_COUNT} elements={cm.elements.Count} cam={camPos} enhancer(frames={CompassEnhancer.Frames} applied={CompassEnhancer.Applied} failed={CompassEnhancer.Failed})");
+                   $"labelThreshold={CompassManager.DISTANCE_LABEL_THRESHOLD} notches={CompassManager.NOTCH_COUNT} elements={cm.elements.Count} cam={camPos} enhancer(frames={CompassEnhancer.Frames} applied={CompassEnhancer.Applied} failed={CompassEnhancer.Failed} overlayDrawn={Overlay.LastDrawn})");
         foreach (var el in cm.elements)
         {
             if (!el.Visible) continue;

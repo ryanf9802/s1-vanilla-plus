@@ -15,16 +15,21 @@ public static class ElevationPatch
     private const float FeetPerUnit = 3.28084f; // vanilla labels are in feet
     private const string Marker = " \u200B";    // zero-width space marks text we appended
     private static bool _errorLogged;
+    public static int Calls, Applied, Failed;
 
     public static void Postfix(CompassManager.Element element)
     {
+        Calls++;
         try
         {
             var cm = CompassManager.Instance;
             var target = element?.TargetTransform;
-            if (cm == null || target == null || cm.cam == null || !element.Visible) return;
+            // CompassManager.cam is a game-side property that throws from inside this hook; use the main camera.
+            var cam = Camera.main != null ? Camera.main.transform : null;
+            if (cm == null || target == null || cam == null || !element.Visible) return;
+            Applied++;
 
-            Vector3 camPos = cm.cam.position;
+            Vector3 camPos = cam.position;
             Vector3 toTarget = target.position - camPos;
             float dist = toTarget.magnitude;
 
@@ -45,7 +50,7 @@ public static class ElevationPatch
             if (idx >= 0) text = text.Substring(0, idx);
 
             // Facing check on the horizontal plane, so looking up/down at a marker still counts.
-            Vector3 fwd = cm.cam.forward; fwd.y = 0f;
+            Vector3 fwd = cam.forward; fwd.y = 0f;
             Vector3 flat = toTarget; flat.y = 0f;
             bool facing = fwd.sqrMagnitude > 1e-4f && flat.sqrMagnitude > 1e-4f
                           && Vector3.Angle(fwd, flat) <= Settings.FacingAngle;
@@ -61,6 +66,7 @@ public static class ElevationPatch
         }
         catch (System.Exception e)
         {
+            Failed++;
             if (_errorLogged) return;
             _errorLogged = true;
             MelonLoader.MelonLogger.Error($"[Compass] ElevationPatch failed (logged once): {e}");

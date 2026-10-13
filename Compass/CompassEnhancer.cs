@@ -30,7 +30,17 @@ public static class CompassEnhancer
 
     private static readonly System.Collections.Generic.Dictionary<int, Entry> Entries = new();
     private static Sprite _chevronSprite;
-    private static bool _errorLogged;
+    private static readonly System.Collections.Generic.Dictionary<string, float> LastError = new();
+
+    /// <summary>Log an exception from <paramref name="where"/>, at most once every 10 s per source, so one failure can't hide another.</summary>
+    internal static void ReportError(string where, System.Exception e)
+    {
+        Failed++;
+        float now = Time.realtimeSinceStartup;
+        if (LastError.TryGetValue(where, out float last) && now - last < 10f) return;
+        LastError[where] = now;
+        MelonLoader.MelonLogger.Error($"[Compass] {where} failed: {e}");
+    }
     private static Il2CppTMPro.TMP_Text _styleSource; // a vanilla distance label, used to match the name label's font
     public static int Frames, Applied, Failed;
     /// <summary>A vanilla marker icon object that other markers (pings) clone; null until a quest marker has been seen.</summary>
@@ -44,9 +54,18 @@ public static class CompassEnhancer
         if (cm == null || cm.elements == null || cam == null) return;
         var camT = cam.transform;
 
+        // A new world means a new CompassManager: everything cached from the old one (icon templates, element entries,
+        // markers, overlay objects) is dead, so start clean instead of trusting null checks on stale references.
+        int cmId = cm.GetInstanceID();
+        if (cmId != _cmId)
+        {
+            if (_cmId != 0) ResetWorldState();
+            _cmId = cmId;
+        }
+
         Overlay.BeginFrame();
-        try { PlayerMarkers.Tick(); } catch (System.Exception e) { Failed++; if (!_errorLogged) { _errorLogged = true; MelonLoader.MelonLogger.Error($"[Compass] PlayerMarkers failed (logged once): {e}"); } }
-        try { CompassApi.Tick(cm); } catch (System.Exception e) { Failed++; if (!_errorLogged) { _errorLogged = true; MelonLoader.MelonLogger.Error($"[Compass] CompassApi failed (logged once): {e}"); } }
+        try { PlayerMarkers.Tick(); } catch (System.Exception e) { ReportError("PlayerMarkers", e); }
+        try { CompassApi.Tick(cm); } catch (System.Exception e) { ReportError("CompassApi", e); }
 
         // Pass 1: among markers you are facing, pick the one that gets a label (closest wins).
         int winner = PickLabelWinner(camT, cm);
@@ -54,21 +73,25 @@ public static class CompassEnhancer
         foreach (var el in cm.elements)
         {
             try { Apply(cm, camT, el, winner); }
-            catch (System.Exception e)
-            {
-                Failed++;
-                if (_errorLogged) continue;
-                _errorLogged = true;
-                MelonLoader.MelonLogger.Error($"[Compass] CompassEnhancer failed (logged once): {e}");
-            }
+            catch (System.Exception e) { ReportError("Element update", e); }
         }
 
         try { Overlay.Render(cm.Canvas, cam, _styleSource); }
-        catch (System.Exception e)
-        {
-            Failed++;
-            if (!_errorLogged) { _errorLogged = true; MelonLoader.MelonLogger.Error($"[Compass] Overlay failed (logged once): {e}"); }
-        }
+        catch (System.Exception e) { ReportError("Overlay", e); }
+    }
+
+    private static int _cmId;
+
+    private static void ResetWorldState()
+    {
+        MelonLoader.MelonLogger.Msg("[Compass] new compass detected (world changed): resetting cached state");
+        Entries.Clear();
+        IconTemplate = null;
+        _styleSource = null;
+        _lastWinner = -1;
+        CompassApi.Reset();
+        PlayerMarkers.Reset();
+        Overlay.Reset();
     }
 
     private static int _lastWinner = -1;

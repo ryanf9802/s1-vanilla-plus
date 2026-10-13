@@ -1,6 +1,6 @@
 {
     "name": "CompassPlus",
-    "version_number": "0.2.3",
+    "version_number": "0.2.4",
     "website_url": "https://github.com/ryanf9802/s1-vanilla-plus",
     "description": "Vanilla+ compass for Schedule I: distance fade, face-to-reveal distance labels, elevation chevrons, and through-wall quest marker icons with names.",
     "dependencies": [

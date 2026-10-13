@@ -109,7 +109,16 @@ public static class CompassApi
             if (h.Follow != null) h.Go.transform.position = h.Follow.position + h.FollowOffset;
 
             var template = GetTemplate(h.Icon);
-            if (template == null) continue; // no vanilla icon to build from yet; try again next frame
+            if (template == null)
+            {
+                // No vanilla icon to build from yet (a compass element with a quest icon has not been seen in this world); try again next frame.
+                if (Time.realtimeSinceStartup - _lastNoTemplateLog > 10f)
+                {
+                    _lastNoTemplateLog = Time.realtimeSinceStartup;
+                    MelonLoader.MelonLogger.Warning($"[Compass] marker '{h.Name}' waiting: no icon template (vanilla icon source {(CompassEnhancer.IconTemplate == null ? "missing" : "present")})");
+                }
+                continue;
+            }
 
             if (h.OnCompass && h.Element == null)
             {
@@ -122,6 +131,25 @@ public static class CompassApi
         }
     }
 
+    private static GameObject _templateHolder;
+
+    /// <summary>Drop everything tied to the previous world: markers, cached templates and generated sprites.</summary>
+    internal static void Reset()
+    {
+        foreach (var h in Markers)
+        {
+            h.Alive = false;
+            try { if (h.Go != null) UnityEngine.Object.Destroy(h.Go); } catch { }
+        }
+        Markers.Clear();
+        ByTarget.Clear();
+        try { if (_templateHolder != null) UnityEngine.Object.Destroy(_templateHolder); } catch { }
+        _templateHolder = null;
+        _pinTemplate = _personTemplate = null;
+        _pinSprite = _dotSprite = _discSprite = _personSprite = null;
+    }
+
+    private static float _lastNoTemplateLog;
     private static Transform _pinTemplate, _personTemplate;
     private static Sprite _pinSprite, _dotSprite, _discSprite, _personSprite;
 
@@ -147,10 +175,15 @@ public static class CompassApi
         var src = CompassEnhancer.IconTemplate;
         if (src == null) return null;
 
-        var holder = new GameObject("CompassMarkerTemplates");
-        holder.SetActive(false); // keeps the prefab itself off screen; clones copy its own active state
+        if (_templateHolder == null)
+        {
+            _templateHolder = new GameObject("CompassMarkerTemplates");
+            _templateHolder.SetActive(false);
+        }
+        var holder = _templateHolder; // keeps the prefab itself off screen; clones copy its own active state
         var go = UnityEngine.Object.Instantiate(src.gameObject, holder.transform, false);
         go.name = icon == MarkerIcon.Person ? "PlayerIcon" : "PingIcon";
+        MelonLoader.MelonLogger.Msg($"[Compass] built {icon} marker template");
         go.SetActive(true);
         var rootImg = go.GetComponent<Image>();
         if (rootImg != null) rootImg.enabled = false;

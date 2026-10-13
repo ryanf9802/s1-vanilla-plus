@@ -27,7 +27,7 @@ public static class BuildInfo
     public const string Name = "Compass";
     public const string Description = "Vanilla+ compass with distance and elevation markers";
     public const string Author = "ryanf9802";
-    public const string Version = "0.2.3";
+    public const string Version = "0.2.4";
 }
 
 public class Compass : MelonMod

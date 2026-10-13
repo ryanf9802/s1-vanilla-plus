@@ -42,6 +42,18 @@ public static class Overlay
         return fadeIn * fadeOut;
     }
 
+    /// <summary>The HUD canvas was replaced (new world): forget every object that lived under the old one.</summary>
+    internal static void Reset()
+    {
+        Pool.Clear();
+        Items.Clear();
+        FrameIconPos.Clear();
+        _root = null;
+        _canvas = null;
+        _nameLabel = null;
+        _nameRect = null;
+    }
+
     public static void BeginFrame() => Items.Clear();
 
     /// <summary>Queue a copy of the vanilla icon object <paramref name="iconSource"/> above <paramref name="worldPos"/> for this frame.

@@ -49,6 +49,7 @@ internal static class PlayerMarkers
             else
             {
                 string name = p.PlayerName ?? "Player";
+                MelonLoader.MelonLogger.Msg($"[Compass] tracking player '{name}'");
                 Tracked[id] = CompassApi.AddTrackedMarker(p.transform, PlayerColors.ColorFor(name), name, MarkerIcon.Person,
                     compass, overlay, new Vector3(0f, _eyeHeight, 0f), overlayLiftFt: 1.2f);
             }
@@ -62,6 +63,14 @@ internal static class PlayerMarkers
             if (Tracked.TryGetValue(id, out var h)) h.Remove();
             Tracked.Remove(id);
         }
+    }
+
+    /// <summary>The world changed: the old markers were destroyed with it.</summary>
+    internal static void Reset()
+    {
+        Tracked.Clear();
+        Seen.Clear();
+        _nextRefresh = 0f;
     }
 
     private static void RemoveAll()

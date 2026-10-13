@@ -15,7 +15,7 @@
 
         <RootNamespace>Ping</RootNamespace>
 
-        <Version>0.2.3</Version>
+        <Version>0.2.4</Version>
         <Author>ryanf9802</Author>
         <Description>Co-op ping with per-player colors, shown on the vanilla compass</Description>
 

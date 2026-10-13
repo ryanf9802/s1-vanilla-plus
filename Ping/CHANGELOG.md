@@ -1,5 +1,8 @@
 # Changelog
 
+## 0.2.4
+- Version bump to match Compass+ 0.2.4 (world-change fix).
+
 ## 0.2.3
 - Fix ping colors not matching the sender's compass marker: pings now carry the sender's in-game name (both players need this version), instead of being matched by Steam name.
 

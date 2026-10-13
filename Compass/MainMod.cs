@@ -58,7 +58,7 @@ public class Compass : MelonMod
         {
             try { DumpCompass(); }
             catch (System.Exception e) { Logger.Error($"Probe failed: {e}"); }
-            yield return new WaitForSeconds(15f);
+            yield return new WaitForSeconds(8f);
         }
     }
 
@@ -71,6 +71,7 @@ public class Compass : MelonMod
                    $"labelThreshold={CompassManager.DISTANCE_LABEL_THRESHOLD} notches={CompassManager.NOTCH_COUNT} elements={cm.elements.Count} cam={camPos}");
         foreach (var el in cm.elements)
         {
+            if (!el.Visible) continue;
             var t = el.TargetTransform;
             var label = el.DistanceLabel;
             string dist = t != null ? Vector3.Distance(camPos, t.position).ToString("F1") : "n/a";

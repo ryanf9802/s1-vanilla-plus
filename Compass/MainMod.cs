@@ -37,6 +37,7 @@ public class Compass : MelonMod
     public override void OnInitializeMelon()
     {
         Logger = LoggerInstance;
+        Settings.Init();
         Logger.Msg("Compass initialized");
     }
 

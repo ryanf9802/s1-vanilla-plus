@@ -1,5 +1,8 @@
 # Changelog
 
+## 0.2.5
+- Version bump to match Compass+ 0.2.5 (icon fix).
+
 ## 0.2.4
 - Version bump to match Compass+ 0.2.4 (world-change fix).
 

@@ -8,7 +8,8 @@
 #   tools/s1 deploy                 close the dev game if running, copy the built DLLs into its Mods/UserLibs
 #   tools/s1 launch                 start the dev game with the MelonLoader console hidden
 #   tools/s1 kill                   close the dev game (only the process running from the dev folder)
-#   tools/s1 log [regex]            newest MelonLoader log, optionally filtered
+#   tools/s1 log [regex]            newest MelonLoader log of the dev game, optionally filtered
+#   tools/s1 mainlog [regex]        READ-ONLY: newest MelonLoader log of the user's main install (the unmarked Schedule I folder)
 set -euo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 COMMON='C:\Program Files (x86)\Steam\steamapps\common'
@@ -70,5 +71,16 @@ case "$cmd" in
         \$lines = \$t -split \"\`n\"
         if ('${1:-}' -ne '') { \$lines | Select-String -Pattern '${1:-}' } else { \$lines | Select -Last 60 }"
     ;;
-  *) sed -n 2,13p "$0"; exit 1 ;;
+  mainlog)
+    # Strictly read-only: opens one log file for reading. The main install is the Schedule I folder without the marker.
+    ps "\$m = Get-ChildItem -LiteralPath '$COMMON' -Directory | Where-Object { (Test-Path -LiteralPath (Join-Path \$_.FullName 'Schedule I.exe')) -and -not (Test-Path -LiteralPath (Join-Path \$_.FullName '$MARKER')) }
+        if (@(\$m).Count -ne 1) { Write-Error 'expected exactly one unmarked Schedule I folder'; exit 1 }
+        \"main: \$(@(\$m)[0].FullName)\"
+        \$f = Get-ChildItem (Join-Path @(\$m)[0].FullName 'MelonLoader\\Logs') | Sort LastWriteTime | Select -Last 1
+        \"log: \$(\$f.Name)  modified \$(\$f.LastWriteTime)\"
+        \$s = [IO.File]::Open(\$f.FullName,'Open','Read','ReadWrite'); \$r = New-Object IO.StreamReader(\$s); \$t = \$r.ReadToEnd(); \$r.Close()
+        \$lines = \$t -split \"\`n\"
+        if ('${1:-}' -ne '') { \$lines | Select-String -Pattern '${1:-}' } else { \$lines | Select -Last 60 }"
+    ;;
+  *) sed -n 2,14p "$0"; exit 1 ;;
 esac

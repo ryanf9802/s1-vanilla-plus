@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.2.5
+- Fix: pings and player markers did not show in worlds whose compass had no `QuestIcon(Clone)` icon (it can be `QuestIcon_Blue(Clone)` or absent). Their icons are now built from scratch and no longer copy a vanilla icon.
+- Overlay icons for vanilla markers accept any icon name.
+
 ## 0.2.4
 - Fix: after loading another world, other players and pings no longer showed. Cached icon templates from the previous world are now discarded when the game creates a new compass.
 - Errors are now logged per source (at most every 10 s) instead of once for everything, and the log notes when player markers and templates are created.

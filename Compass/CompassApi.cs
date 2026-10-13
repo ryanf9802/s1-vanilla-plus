@@ -109,16 +109,7 @@ public static class CompassApi
             if (h.Follow != null) h.Go.transform.position = h.Follow.position + h.FollowOffset;
 
             var template = GetTemplate(h.Icon);
-            if (template == null)
-            {
-                // No vanilla icon to build from yet (a compass element with a quest icon has not been seen in this world); try again next frame.
-                if (Time.realtimeSinceStartup - _lastNoTemplateLog > 10f)
-                {
-                    _lastNoTemplateLog = Time.realtimeSinceStartup;
-                    MelonLoader.MelonLogger.Warning($"[Compass] marker '{h.Name}' waiting: no icon template (vanilla icon source {(CompassEnhancer.IconTemplate == null ? "missing" : "present")})");
-                }
-                continue;
-            }
+            if (template == null) continue;
 
             if (h.OnCompass && h.Element == null)
             {
@@ -149,7 +140,6 @@ public static class CompassApi
         _pinSprite = _dotSprite = _discSprite = _personSprite = null;
     }
 
-    private static float _lastNoTemplateLog;
     private static Transform _pinTemplate, _personTemplate;
     private static Sprite _pinSprite, _dotSprite, _discSprite, _personSprite;
 
@@ -167,31 +157,31 @@ public static class CompassApi
     }
 
     /// <summary>
-    /// The icon API markers use: a copy of the vanilla marker object (keeps its distance label and layout) whose circle and
-    /// glyph are replaced by our own shape. The colored shape is tinted per marker; the white glyph on it is not.
+    /// The icon API markers use, built from scratch (no dependence on any vanilla icon existing in the world): an empty icon
+    /// object of the compass's element size holding our own colored shape and a white glyph. The shape is tinted per marker.
     /// </summary>
     private static Transform BuildTemplate(MarkerIcon icon)
     {
-        var src = CompassEnhancer.IconTemplate;
-        if (src == null) return null;
+        Vector2 size = new(40f, 40f);
+        try
+        {
+            var cm = CompassManager.Instance;
+            if (cm != null && cm.ElementContentSize.x > 1f) size = cm.ElementContentSize;
+        }
+        catch { /* keep the default size */ }
 
         if (_templateHolder == null)
         {
             _templateHolder = new GameObject("CompassMarkerTemplates");
-            _templateHolder.SetActive(false);
+            _templateHolder.SetActive(false); // keeps the prefab itself off screen; clones copy its own active state
         }
-        var holder = _templateHolder; // keeps the prefab itself off screen; clones copy its own active state
-        var go = UnityEngine.Object.Instantiate(src.gameObject, holder.transform, false);
-        go.name = icon == MarkerIcon.Person ? "PlayerIcon" : "PingIcon";
-        MelonLoader.MelonLogger.Msg($"[Compass] built {icon} marker template");
+        var go = new GameObject(icon == MarkerIcon.Person ? "PlayerIcon" : "PingIcon");
+        var root = go.AddComponent<RectTransform>();
+        root.SetParent(_templateHolder.transform, false);
+        root.anchorMin = root.anchorMax = root.pivot = new Vector2(0.5f, 0.5f);
+        root.sizeDelta = size;
         go.SetActive(true);
-        var rootImg = go.GetComponent<Image>();
-        if (rootImg != null) rootImg.enabled = false;
-        for (int i = go.transform.childCount - 1; i >= 0; i--)
-        {
-            var child = go.transform.GetChild(i);
-            if (child.name != "Text") UnityEngine.Object.DestroyImmediate(child.gameObject);
-        }
+        MelonLoader.MelonLogger.Msg($"[Compass] built {icon} marker template ({size.x:0}x{size.y:0})");
 
         bool person = icon == MarkerIcon.Person;
         var shape = new GameObject(TintName(icon));

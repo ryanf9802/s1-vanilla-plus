@@ -7,7 +7,7 @@ public static class Settings
 {
     private static MelonPreferences_Entry<bool> _overlayQuestsOnly;
     private static MelonPreferences_Entry<float> _fadeStartFt, _maxDistanceFt, _minAlpha, _facingAngle, _chevronThresholdFt, _chevronSize,
-        _overlayMaxFt, _overlayFadeStartFt, _overlayFadeEndFt, _overlayHeightFt, _overlaySize, _overlayOpacity;
+        _overlayMaxFt, _overlayFadeStartFt, _overlayFadeEndFt, _overlayHeightFt, _overlaySize, _overlayOpacity, _overlayFadeInFt;
 
     /// <summary>Markers closer than this many feet are fully opaque.</summary>
     public static float FadeStartFt => _fadeStartFt.Value;
@@ -30,6 +30,8 @@ public static class Settings
     /// <summary>How far above the target the icon floats.</summary>
     public static float OverlayHeightFt => _overlayHeightFt.Value;
     public static float OverlaySize => _overlaySize.Value;
+    /// <summary>Icons fade in from 0 to full over this many feet after entering OverlayMaxFt (so they don't pop in).</summary>
+    public static float OverlayFadeInFt => _overlayFadeInFt.Value;
     /// <summary>Overall opacity of overlay icons (0-1), multiplied with the distance fade.</summary>
     public static float OverlayOpacity => _overlayOpacity.Value;
     /// <summary>If true, only numbered quest objectives get overlay icons; if false, map landmarks do too.</summary>
@@ -49,6 +51,7 @@ public static class Settings
         _overlayHeightFt = c.CreateEntry("OverlayHeightFt", 5f, description: "How many feet above the target the overlay icon floats");
         _overlayQuestsOnly = c.CreateEntry("OverlayQuestsOnly", false, description: "true: only numbered quest objectives get overlay icons; false: map landmarks too (NPCs never do)");
         _overlayOpacity = c.CreateEntry("OverlayOpacity", 0.6f, description: "Overall opacity of overlay icons (0-1)");
+        _overlayFadeInFt = c.CreateEntry("OverlayFadeInFt", 16.4f, description: "Overlay icons fade in over this many feet after entering OverlayMaxFt (16.4ft = 5m)");
         _overlaySize = c.CreateEntry("OverlaySize", 28f, description: "Overlay icon size in UI pixels");
         _chevronSize = c.CreateEntry("ChevronSize", 8f, description: "Chevron size in UI pixels");
     }

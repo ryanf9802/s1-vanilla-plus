@@ -26,11 +26,15 @@ public static class Overlay
 
     public static int LastDrawn;
 
-    /// <summary>Distance-based opacity shared by every overlay icon: 0 beyond MaxFt, 1 from FadeStartFt out, ramping to 0 at FadeEndFt.</summary>
+    /// <summary>Distance-based opacity shared by every overlay icon: 0 beyond MaxFt, ramping up over the first FadeInFt after entering range,
+    /// full until FadeStartFt, then ramping down to 0 at FadeEndFt.</summary>
     public static float AlphaForDistanceFt(float distFt)
     {
-        if (distFt > Settings.OverlayMaxFt) return 0f;
-        return Mathf.Clamp01(Mathf.InverseLerp(Settings.OverlayFadeEndFt, Settings.OverlayFadeStartFt, distFt));
+        float max = Settings.OverlayMaxFt;
+        if (distFt > max) return 0f;
+        float fadeIn = Settings.OverlayFadeInFt > 0f ? Mathf.Clamp01(Mathf.InverseLerp(max, max - Settings.OverlayFadeInFt, distFt)) : 1f;
+        float fadeOut = Mathf.Clamp01(Mathf.InverseLerp(Settings.OverlayFadeEndFt, Settings.OverlayFadeStartFt, distFt));
+        return fadeIn * fadeOut;
     }
 
     public static void BeginFrame() => Items.Clear();

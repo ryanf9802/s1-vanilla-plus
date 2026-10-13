@@ -1,7 +1,7 @@
 # Changelog
 
 ## Unreleased
-- Overlay icons now appear within 100 ft by default (was 75 ft).
+- Overlay icons now appear within 50 ft by default (was 75 ft).
 - Through-wall overlay icons hide while the phone is open instead of drawing over it.
 
 ## 0.1.0

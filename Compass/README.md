@@ -6,7 +6,7 @@ A "vanilla+" upgrade to Schedule I's compass. Everything uses the game's own fon
 - **Distance fade:** compass markers dim with distance, are fully opaque up close, and disappear past 500 ft.
 - **Look to reveal distance:** a marker's distance label shows at *any* range while you face it (vanilla only labels markers within ~165 ft, regardless of where you look). Only the closest marker in your view gets a label, so clusters stay readable.
 - **Elevation chevron:** a small up or down chevron after the distance tells you the target is 10 ft or more above or below you.
-- **Through-wall marker icons:** quest markers and landmarks within 100 ft get their own icon floating above them, visible through walls. Icons ease in as you approach and fade out as you reach the marker. Look at an icon and its name appears underneath.
+- **Through-wall marker icons:** quest markers and landmarks within 50 ft get their own icon floating above them, visible through walls. Icons ease in as you approach and fade out as you reach the marker. Look at an icon and its name appears underneath.
 - **Everything is configurable**: see below.
 
 ## Installation
@@ -26,7 +26,7 @@ Settings live in `UserData/MelonPreferences.cfg` under `[Compass]` and `[Compass
 | `MinAlpha` | 0.25 | Opacity at max distance |
 | `FacingAngle` | 6 | Degrees from straight ahead that count as "facing" a marker |
 | `ChevronThresholdFt` / `ChevronSize` | 10 / 8 | When the elevation chevron shows, and its size |
-| `OverlayMaxFt` | 100 | Overlay icons appear within this distance |
+| `OverlayMaxFt` | 50 | Overlay icons appear within this distance |
 | `OverlayFadeInFt` | 16.4 | Icons fade in over this distance (5 m) |
 | `OverlayFadeStartFt` / `OverlayFadeEndFt` | 6 / 2 | Icons fade out between these distances |
 | `OverlayHeightFt` | 5 | Height above the target |

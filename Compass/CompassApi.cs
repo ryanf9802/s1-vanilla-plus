@@ -128,7 +128,8 @@ public static class CompassApi
             if (h.Element != null) TintIcon(h); // every frame: the element's rect may not exist yet on the frame it is added
             if (h.OnOverlay)
                 Overlay.Submit(h.Go.transform.position, template, h.Name, h.Color, LifetimeAlpha(h.Go.transform),
-                    alwaysVisible: !h.FadesWithDistance, key: h.Go.transform.GetInstanceID(), liftFt: h.FadesWithDistance ? h.LiftFt : (float?)null);
+                    alwaysVisible: !h.FadesWithDistance, key: h.Go.transform.GetInstanceID(), liftFt: h.FadesWithDistance ? h.LiftFt : (float?)null,
+                    maxFt: h.Icon == MarkerIcon.Dealer ? Settings.DealerOverlayMaxFt : h.Icon == MarkerIcon.Person ? Settings.PlayerOverlayMaxFt : (float?)null);
         }
     }
 

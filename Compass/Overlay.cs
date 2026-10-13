@@ -14,7 +14,7 @@ public static class Overlay
     private const float FeetPerUnit = 3.28084f;
     private const float EyeHeight = 1.7f; // measure distance from the player's feet, not the camera
 
-    private struct Item { public Vector3 Pos; public Transform Source; public string Name; public Color? Tint; public float AlphaMul; public bool Always; public int Key; public float? LiftFt; }
+    private struct Item { public Vector3 Pos; public Transform Source; public string Name; public Color? Tint; public float AlphaMul; public bool Always; public int Key; public float? LiftFt; public float MaxFt; }
 
     // One live clone of a vanilla icon object (circle + glyph children) per drawn item.
     private class Slot { public GameObject Go; public RectTransform Rt; public CanvasGroup Group; public Image Disc; public int SourceId; public int Stamp; }
@@ -33,9 +33,9 @@ public static class Overlay
 
     /// <summary>Distance-based opacity shared by every overlay icon: 0 beyond MaxFt, ramping up over the first FadeInFt after entering range,
     /// full until FadeStartFt, then ramping down to 0 at FadeEndFt.</summary>
-    public static float AlphaForDistanceFt(float distFt)
+    public static float AlphaForDistanceFt(float distFt, float? maxFt = null)
     {
-        float max = Settings.OverlayMaxFt;
+        float max = maxFt ?? Settings.OverlayMaxFt;
         if (distFt > max) return 0f;
         float fadeIn = Settings.OverlayFadeInFt > 0f ? Mathf.Clamp01(Mathf.InverseLerp(max, max - Settings.OverlayFadeInFt, distFt)) : 1f;
         float fadeOut = Mathf.Clamp01(Mathf.InverseLerp(Settings.OverlayFadeEndFt, Settings.OverlayFadeStartFt, distFt));
@@ -61,9 +61,9 @@ public static class Overlay
     /// <summary>Queue a copy of the vanilla icon object <paramref name="iconSource"/> above <paramref name="worldPos"/> for this frame.
     /// <paramref name="key" /> identifies the marker for the name label when several share one icon source (pings).
     /// Distance fade and global opacity are applied by the overlay, unless <paramref name="alwaysVisible"/> (full opacity at any range).</summary>
-    public static void Submit(Vector3 worldPos, Transform iconSource, string name = null, Color? tint = null, float alphaMul = 1f, bool alwaysVisible = false, int key = 0, float? liftFt = null)
+    public static void Submit(Vector3 worldPos, Transform iconSource, string name = null, Color? tint = null, float alphaMul = 1f, bool alwaysVisible = false, int key = 0, float? liftFt = null, float? maxFt = null)
     {
-        if (iconSource != null) Items.Add(new Item { Pos = worldPos, Source = iconSource, Name = name, Tint = tint, AlphaMul = alphaMul, Always = alwaysVisible, Key = key != 0 ? key : iconSource.GetInstanceID(), LiftFt = liftFt });
+        if (iconSource != null) Items.Add(new Item { Pos = worldPos, Source = iconSource, Name = name, Tint = tint, AlphaMul = alphaMul, Always = alwaysVisible, Key = key != 0 ? key : iconSource.GetInstanceID(), LiftFt = liftFt, MaxFt = maxFt ?? Settings.OverlayMaxFt });
     }
 
     public static void Render(Canvas hudCanvas, Camera cam, Il2CppTMPro.TMP_Text styleSource)
@@ -92,7 +92,7 @@ public static class Overlay
         var screenCenter = new Vector2(Screen.width * 0.5f, Screen.height * 0.5f);
         foreach (var item in Items)
         {
-            float alpha = item.Always ? 1f : AlphaForDistanceFt(Vector3.Distance(feet, item.Pos) * FeetPerUnit);
+            float alpha = item.Always ? 1f : AlphaForDistanceFt(Vector3.Distance(feet, item.Pos) * FeetPerUnit, item.MaxFt);
             if (alpha <= 0.01f) continue;
             Vector3 sp = cam.WorldToScreenPoint(item.Always ? item.Pos : item.Pos + (item.LiftFt.HasValue ? new Vector3(0f, item.LiftFt.Value / FeetPerUnit, 0f) : lift));
             if (sp.z <= 0f || sp.x < 0f || sp.y < 0f || sp.x > Screen.width || sp.y > Screen.height) continue;

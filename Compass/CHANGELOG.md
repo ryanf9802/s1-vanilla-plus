@@ -1,5 +1,8 @@
 # Changelog
 
+## Unreleased
+- Separate through-wall icon ranges: `OverlayMaxFt` (compass things, 50 ft), `DealerOverlayMaxFt` (100 ft) and `PlayerOverlayMaxFt` (150 ft).
+
 ## 0.3.0
 - Recruited dealers show on the compass with their phone-map portrait in a green round frame (`ShowDealers`; a green sack icon if the game has no portrait), with an optional through-wall icon (`DealersOnOverlay`, off by default).
 

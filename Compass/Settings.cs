@@ -12,7 +12,7 @@ namespace Compass;
 public static class Settings
 {
     private static MelonPreferences_Entry<float> _maxDistanceFt, _fadeStartFt, _minAlpha, _facingAngle, _chevronThresholdFt, _chevronSize;
-    private static MelonPreferences_Entry<float> _overlayMaxFt, _overlayFadeInFt, _overlayFadeStartFt, _overlayFadeEndFt, _overlayHeightFt,
+    private static MelonPreferences_Entry<float> _overlayMaxFt, _dealerOverlayMaxFt, _playerOverlayMaxFt, _overlayFadeInFt, _overlayFadeStartFt, _overlayFadeEndFt, _overlayHeightFt,
         _overlaySize, _overlayOpacity, _overlayLookRadius, _overlayNameOpacity, _overlayNameScale;
     private static MelonPreferences_Entry<bool> _overlayQuestsOnly, _overlayShowNames, _debugLogging, _showPlayers, _playersOnOverlay, _showDealers, _dealersOnOverlay;
 
@@ -35,6 +35,9 @@ public static class Settings
     public static bool ShowDealers => _showDealers.Value;
     /// <summary>Show a through-wall icon above your recruited dealers (within the overlay distance).</summary>
     public static bool DealersOnOverlay => _dealersOnOverlay.Value;
+    /// <summary>Through-wall icons for dealers / co-op partners appear within these many feet.</summary>
+    public static float DealerOverlayMaxFt => _dealerOverlayMaxFt.Value;
+    public static float PlayerOverlayMaxFt => _playerOverlayMaxFt.Value;
     public static bool DebugLogging => _debugLogging.Value;
 
     // --- Overlay icons (distances in feet) -----------------------------------------------------------------------
@@ -77,8 +80,11 @@ public static class Settings
         _showPlayers = pl.CreateEntry("ShowPlayers", true, "Show players on compass", "Show your co-op partners on the compass, each in their own color.");
         _playersOnOverlay = pl.CreateEntry("PlayersOnOverlay", false, "Show players through walls", "Show an icon above co-op partners within the overlay distance, even through walls.");
 
+        _playerOverlayMaxFt = Float(pl, "PlayerOverlayMaxFt", 150f, "Players: show within (ft)", "Through-wall icons for co-op partners appear within this distance.", 10f, 1000f);
         _showDealers = pl.CreateEntry("ShowDealers", true, "Show dealers on compass", "Show your recruited dealers on the compass.");
         _dealersOnOverlay = pl.CreateEntry("DealersOnOverlay", false, "Show dealers through walls", "Show an icon above your recruited dealers within the overlay distance, even through walls.");
+
+        _dealerOverlayMaxFt = Float(pl, "DealerOverlayMaxFt", 100f, "Dealers: show within (ft)", "Through-wall icons for your dealers appear within this distance.", 10f, 1000f);
 
         var o = MelonPreferences.CreateCategory("Compass_Overlay", "Compass - Overlay icons");
         _overlayMaxFt = Float(o, "OverlayMaxFt", 50f, "Show within (ft)", "Overlay icons appear above quest markers and landmarks within this distance, even through walls.", 10f, 500f);

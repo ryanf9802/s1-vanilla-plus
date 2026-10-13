@@ -30,7 +30,8 @@ Settings live in `UserData/MelonPreferences.cfg` under `[Compass]`, `[Compass_Pl
 | `ChevronThresholdFt` / `ChevronSize` | 10 / 8 | When the elevation chevron shows, and its size |
 | `ShowPlayers` / `PlayersOnOverlay` | on / off | Co-op partners on the compass strip / through walls |
 | `ShowDealers` / `DealersOnOverlay` | on / off | Your recruited dealers on the compass strip / through walls |
-| `OverlayMaxFt` | 50 | Overlay icons appear within this distance |
+| `OverlayMaxFt` | 50 | Overlay icons for quest markers, landmarks and NPCs appear within this distance |
+| `DealerOverlayMaxFt` / `PlayerOverlayMaxFt` | 100 / 150 | Same, for dealers and co-op partners |
 | `OverlayFadeInFt` | 16.4 | Icons fade in over this distance (5 m) |
 | `OverlayFadeStartFt` / `OverlayFadeEndFt` | 6 / 2 | Icons fade out between these distances |
 | `OverlayHeightFt` | 5 | Height above the target |

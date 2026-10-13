@@ -13,6 +13,7 @@ public sealed class MarkerHandle
     internal float Expire, FadeOut;
     internal bool OnCompass, OnOverlay;
     internal CompassManager.Element Element;
+    internal Image Pin;
 
     /// <summary>True until the marker expires or is removed.</summary>
     public bool Alive { get; internal set; } = true;
@@ -201,15 +202,14 @@ public static class CompassApi
 
     private static void TintIcon(MarkerHandle h)
     {
-        var rect = h.Element?.Rect;
-        if (rect == null) return;
-        for (int c = 0; c < rect.childCount; c++)
+        if (h.Pin == null)
         {
-            var child = rect.GetChild(c);
-            if (child.name == "Text" || child.name == "CompassChevron") continue;
-            var img = child.GetComponent<Image>();
-            if (img != null) img.color = h.Color; // the colored disc; glyph children keep their own colors
+            var rect = h.Element?.Rect;
+            if (rect == null) return;
+            foreach (var img in rect.GetComponentsInChildren<Image>(true))
+                if (img.gameObject.name == "PingPin") { h.Pin = img; break; }
         }
+        if (h.Pin != null) h.Pin.color = h.Color; // the dot stays white
     }
 
     private static void Destroy(CompassManager cm, MarkerHandle h)

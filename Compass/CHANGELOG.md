@@ -1,6 +1,8 @@
 # Changelog
 
 ## Unreleased
+- Overlay icons now cover everything on the compass (quest objectives, landmarks, NPCs, other markers), not just quest-prefab markers.
+- Overlay labels for quest objectives show the objective's own title.
 - API markers (used by Ping) get their own pin icon tinted per marker, stay at full opacity at any range, and sit on their spot.
 - Overlay icons now appear within 50 ft by default (was 75 ft).
 - Through-wall overlay icons hide while the phone is open instead of drawing over it.

@@ -208,16 +208,26 @@ public static class CompassEnhancer
     {
         entry.IconSearched = true;
         string n = target.name ?? "";
-        // Quest objectives and map landmarks share the QuestElement prefab; NPCs use a different one.
-        bool questPrefab = (rect.name ?? "").StartsWith("QuestElement");
         bool numbered = n.Length > 2 && n[0] == '(' && char.IsDigit(n[1]); // "(3) Go to Gas-Mart (Inactive)"
-        entry.IsQuest = questPrefab && !CompassApi.IsMarkerTarget(target) && (!Settings.OverlayQuestsOnly || numbered);
+        // Everything on the compass gets an overlay icon (quest objectives, landmarks, NPCs...); the setting can narrow it to quests.
+        entry.IsQuest = !CompassApi.IsMarkerTarget(target) && (!Settings.OverlayQuestsOnly || numbered);
         if (!entry.IsQuest) return;
+
+        // The element is the vanilla wrapper: a distance label ("Text") plus the icon object (circle + glyph) that we clone.
+        Transform icon = rect.Find("QuestIcon(Clone)");
+        for (int i = 0; icon == null && i < rect.childCount; i++)
+        {
+            var child = rect.GetChild(i);
+            if (child.name != "Text") icon = child;
+        }
+        entry.Icon = icon;
+        entry.IsQuest = icon != null;
         entry.DisplayName = CleanName(n);
-        var iconT = rect.Find("QuestIcon(Clone)");
-        entry.Icon = iconT;
-        if (iconT != null && IconTemplate == null) IconTemplate = iconT;
-        MelonLoader.MelonLogger.Msg($"[Compass] quest marker '{n}' icon={(entry.Icon != null ? entry.Icon.name + " children=" + entry.Icon.childCount : "none")}");
+        var npc = target.GetComponentInParent<Il2CppScheduleOne.NPCs.NPC>();
+        if (npc != null && !string.IsNullOrEmpty(npc.FullName)) entry.DisplayName = npc.FullName;
+        if (icon != null && IconTemplate == null && icon.name == "QuestIcon(Clone)") IconTemplate = icon;
+        if (Settings.DebugLogging)
+            MelonLoader.MelonLogger.Msg($"[Compass] overlay marker '{n}' element={rect.name} icon={(icon != null ? icon.name + " children=" + icon.childCount : "none")}");
     }
 
     private static Entry GetEntry(RectTransform rect, Il2CppTMPro.TMP_Text label)

@@ -73,7 +73,7 @@ public static class Settings
         _overlayHeightFt = Float(o, "OverlayHeightFt", 5f, "Height above target (ft)", "How far above the target the icon floats.", 0f, 30f);
         _overlaySize = Float(o, "OverlaySize", 22f, "Icon size", "Overlay icon size in UI pixels.", 8f, 100f);
         _overlayOpacity = Float(o, "OverlayOpacity", 0.6f, "Icon opacity", "Overall opacity of overlay icons, at their most visible.", 0.05f, 1f);
-        _overlayQuestsOnly = o.CreateEntry("OverlayQuestsOnly", false, "Quest objectives only", "On: only numbered quest objectives get overlay icons. Off: map landmarks do too. NPCs never do.");
+        _overlayQuestsOnly = o.CreateEntry("OverlayQuestsOnly", false, "Quest objectives only", "On: only numbered quest objectives get overlay icons. Off: everything shown on the compass does (landmarks, NPCs, other markers).");
         _overlayShowNames = o.CreateEntry("OverlayShowNames", true, "Show names", "Show the marker's name under an overlay icon while you look at it.");
         _overlayLookRadius = Float(o, "OverlayLookRadius", 0.05f, "Look radius", "How close to screen center an icon must be to count as looked at, as a fraction of screen height.", 0.01f, 0.3f);
         _overlayNameOpacity = Float(o, "OverlayNameOpacity", 0.85f, "Name opacity", "Opacity of the name label.", 0.05f, 1f);

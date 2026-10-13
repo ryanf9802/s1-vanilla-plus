@@ -1,8 +1,14 @@
-﻿<Project>
+<Project>
     <PropertyGroup>
-        <!-- Paths and conditions -->
-        <S1MonoDir>C:\Program Files (x86)\Steam\steamapps\common\Schedule I</S1MonoDir>
-        <S1CPPDir>C:\Program Files (x86)\Steam\steamapps\common\Schedule I</S1CPPDir>
-        <RunPostBuildEvent>OnBuildSuccess</RunPostBuildEvent>
+        <!-- The dev (modded) game folder. Never hardcode a folder name here: tools/s1 finds the folder carrying the
+             `.s1vp-dev` marker file and passes it as -p:S1DevDir=..., or set the S1_DEV_DIR environment variable. -->
+        <S1DevDir Condition="'$(S1DevDir)' == ''">$(S1_DEV_DIR)</S1DevDir>
+        <S1MonoDir>$(S1DevDir)</S1MonoDir>
+        <S1CPPDir>$(S1DevDir)</S1CPPDir>
+        <!-- The template's post-build step kills every "Schedule I.exe" (including the main install) and relaunches the game. Off by default. -->
+        <RunPostBuildEvent>Never</RunPostBuildEvent>
     </PropertyGroup>
+    <Target Name="RequireDevDir" BeforeTargets="ResolveAssemblyReferences;CoreCompile" Condition="'$(S1DevDir)' == ''">
+        <Error Text="No dev game folder: build with tools/s1 build (it finds the folder containing .s1vp-dev) or set S1_DEV_DIR." />
+    </Target>
 </Project>

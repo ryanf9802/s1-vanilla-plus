@@ -1,0 +1,74 @@
+#!/usr/bin/env bash
+# Dev helper for the modded Schedule I install. The dev folder is whichever Steam game folder contains a `.s1vp-dev`
+# marker file, so renaming or swapping folders never matters. Nothing here ever touches a folder without the marker.
+#
+#   tools/s1 mark "<folder name>"   put the marker in that folder (and take it off any other)
+#   tools/s1 dir                    print the dev folder
+#   tools/s1 build [Compass|Ping]   compile (default: both); never runs the template's post-build step
+#   tools/s1 deploy                 close the dev game if running, copy the built DLLs into its Mods/UserLibs
+#   tools/s1 launch                 start the dev game with the MelonLoader console hidden
+#   tools/s1 kill                   close the dev game (only the process running from the dev folder)
+#   tools/s1 log [regex]            newest MelonLoader log, optionally filtered
+set -euo pipefail
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+COMMON='C:\Program Files (x86)\Steam\steamapps\common'
+MARKER='.s1vp-dev'
+
+ps() { (cd /tmp && powershell.exe -NoProfile -Command "$1" | tr -d '\r'); }
+
+dev_dir() {
+  local found count
+  found=$(ps "Get-ChildItem -LiteralPath '$COMMON' -Directory | Where-Object { Test-Path -LiteralPath (Join-Path \$_.FullName '$MARKER') } | ForEach-Object { \$_.FullName }")
+  count=$(printf '%s' "$found" | grep -c . || true)
+  if [ "$count" -ne 1 ]; then
+    echo "Expected exactly one game folder with a $MARKER marker, found $count. Run: tools/s1 mark \"<folder name>\"" >&2
+    exit 1
+  fi
+  printf '%s' "$found"
+}
+
+win() { (cd /tmp && wslpath -w "$1"); }
+
+cmd="${1:-}"; shift || true
+case "$cmd" in
+  mark)
+    name="${1:?folder name under steamapps\\common}"
+    ps "\$t = Join-Path '$COMMON' '$name'; if (-not (Test-Path -LiteralPath \$t)) { Write-Error 'no such folder'; exit 1 }
+        Get-ChildItem -LiteralPath '$COMMON' -Directory | ForEach-Object { \$m = Join-Path \$_.FullName '$MARKER'; if ((Test-Path -LiteralPath \$m) -and \$_.FullName -ne \$t) { Remove-Item -LiteralPath \$m } }
+        New-Item -ItemType File -Force -Path (Join-Path \$t '$MARKER') | Out-Null; \"marked: \$t\""
+    ;;
+  dir) dev_dir; echo ;;
+  build)
+    dev=$(dev_dir)
+    mods=("${@:-Compass Ping}"); read -ra mods <<< "${mods[*]}"
+    for m in "${mods[@]}"; do
+      echo "== build $m"
+      ps "& 'C:\\Program Files\\dotnet\\dotnet.exe' build '$(win "$ROOT/$m/$m.csproj")' -c IL2CPP -p:S1DevDir='$dev' -p:RunPostBuildEvent=Never" | grep -E "error CS|error MSB|Build succeeded|FAILED" || true
+    done
+    ;;
+  kill)
+    dev=$(dev_dir)
+    ps "Get-Process 'Schedule I' -ErrorAction SilentlyContinue | Where-Object { \$_.Path -like '$dev\\*' } | Stop-Process -Force; Start-Sleep 3; 'closed'"
+    ;;
+  deploy)
+    dev=$(dev_dir)
+    "$0" kill >/dev/null
+    ps "Copy-Item '$(win "$ROOT/Compass/bin/IL2CPP/net6/Compass-IL2CPP.dll")' '$dev\\Mods\\Compass-IL2CPP.dll' -Force
+        Copy-Item '$(win "$ROOT/Ping/bin/IL2CPP/net6/Ping-IL2CPP.dll")' '$dev\\Mods\\Ping-IL2CPP.dll' -Force
+        New-Item -ItemType Directory -Force '$dev\\UserLibs' | Out-Null
+        Copy-Item '$(win "$ROOT/Ping/libs/SteamNetworkLib.dll")' '$dev\\UserLibs\\SteamNetworkLib-IL2Cpp.dll' -Force
+        'deployed to $dev'"
+    ;;
+  launch)
+    dev=$(dev_dir)
+    ps "Start-Process -FilePath '$dev\\Schedule I.exe' -WorkingDirectory '$dev' -ArgumentList '--melonloader.hideconsole'; 'launched $dev'"
+    ;;
+  log)
+    dev=$(dev_dir)
+    ps "\$f = Get-ChildItem '$dev\\MelonLoader\\Logs' | Sort LastWriteTime | Select -Last 1
+        \$s = [IO.File]::Open(\$f.FullName,'Open','Read','ReadWrite'); \$r = New-Object IO.StreamReader(\$s); \$t = \$r.ReadToEnd(); \$r.Close()
+        \$lines = \$t -split \"\`n\"
+        if ('${1:-}' -ne '') { \$lines | Select-String -Pattern '${1:-}' } else { \$lines | Select -Last 60 }"
+    ;;
+  *) sed -n 2,13p "$0"; exit 1 ;;
+esac

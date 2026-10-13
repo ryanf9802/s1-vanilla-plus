@@ -18,11 +18,11 @@ Download from [Releases](https://github.com/ryanf9802/s1-vanilla-plus/releases) 
 
 ## Building
 
-Requires the .NET 8 SDK and a MelonLoader 0.7.3 install of the game. Set the game path in `Compass/build/paths.props`, then:
+Requires the .NET 8 SDK and a MelonLoader 0.7.3 install of the game, kept as a separate copy for development. Point the build at that copy with an `S1_DEV_DIR` environment variable (or `-p:S1DevDir=<folder>`), then:
 
     dotnet build Compass/Compass.csproj -c IL2CPP
 
-The template's post-build step copies the DLL into the game's `Mods` folder and relaunches the game; add `-p:RunPostBuildEvent=Never` to only compile.
+The build never runs the template's post-build step (it killed and relaunched the game); copy the DLL into the game's `Mods` folder yourself. `tools/s1` (WSL/bash) wraps build, deploy and launch for a game folder marked with a `.s1vp-dev` file.
 
 To make release packages: build each mod, then `./package_all.py`. It writes one zip per mod plus the all-in-one bundle to `dist/`.
 

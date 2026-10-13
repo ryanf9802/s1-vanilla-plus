@@ -7,7 +7,7 @@ public static class Settings
 {
     private static MelonPreferences_Entry<bool> _overlayQuestsOnly;
     private static MelonPreferences_Entry<float> _fadeStartFt, _maxDistanceFt, _minAlpha, _facingAngle, _chevronThresholdFt, _chevronSize,
-        _overlayMaxFt, _overlayFadeStartFt, _overlayFadeEndFt, _overlayHeightFt, _overlaySize;
+        _overlayMaxFt, _overlayFadeStartFt, _overlayFadeEndFt, _overlayHeightFt, _overlaySize, _overlayOpacity;
 
     /// <summary>Markers closer than this many feet are fully opaque.</summary>
     public static float FadeStartFt => _fadeStartFt.Value;
@@ -30,6 +30,8 @@ public static class Settings
     /// <summary>How far above the target the icon floats.</summary>
     public static float OverlayHeightFt => _overlayHeightFt.Value;
     public static float OverlaySize => _overlaySize.Value;
+    /// <summary>Overall opacity of overlay icons (0-1), multiplied with the distance fade.</summary>
+    public static float OverlayOpacity => _overlayOpacity.Value;
     /// <summary>If true, only numbered quest objectives get overlay icons; if false, map landmarks do too.</summary>
     public static bool OverlayQuestsOnly => _overlayQuestsOnly.Value;
 
@@ -44,8 +46,9 @@ public static class Settings
         _overlayMaxFt = c.CreateEntry("OverlayMaxFt", 75f, description: "Overlay icons (quest objectives) show within this many feet");
         _overlayFadeStartFt = c.CreateEntry("OverlayFadeStartFt", 6f, description: "Overlay icons start fading out when closer than this many feet");
         _overlayFadeEndFt = c.CreateEntry("OverlayFadeEndFt", 2f, description: "Overlay icons are fully invisible at this many feet or closer");
-        _overlayHeightFt = c.CreateEntry("OverlayHeightFt", 6.5f, description: "How many feet above the target the overlay icon floats");
+        _overlayHeightFt = c.CreateEntry("OverlayHeightFt", 5f, description: "How many feet above the target the overlay icon floats");
         _overlayQuestsOnly = c.CreateEntry("OverlayQuestsOnly", false, description: "true: only numbered quest objectives get overlay icons; false: map landmarks too (NPCs never do)");
+        _overlayOpacity = c.CreateEntry("OverlayOpacity", 0.6f, description: "Overall opacity of overlay icons (0-1)");
         _overlaySize = c.CreateEntry("OverlaySize", 28f, description: "Overlay icon size in UI pixels");
         _chevronSize = c.CreateEntry("ChevronSize", 8f, description: "Chevron size in UI pixels");
     }

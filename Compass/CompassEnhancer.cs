@@ -20,7 +20,7 @@ public static class CompassEnhancer
         public RectTransform Rect;
         public Image Chevron;
         public RectTransform ChevronRect;
-        public Image Icon;          // the vanilla marker icon, reused for the overlay
+        public Transform Icon;      // the vanilla marker icon object (circle + glyph), cloned for the overlay
         public bool IsQuest;
         public bool IconSearched;
         public readonly System.Collections.Generic.List<CanvasGroup> Groups = new();
@@ -119,7 +119,7 @@ public static class CompassEnhancer
         // Overlay: quest objectives and landmarks (not NPCs) get an icon above them in the world.
         if (!entry.IconSearched) FindIcon(entry, rect, target);
         if (entry.IsQuest && entry.Icon != null && cm.CompassEnabled)
-            Overlay.Submit(target.position, entry.Icon.sprite, entry.Icon.color);
+            Overlay.Submit(target.position, entry.Icon);
 
         // Label: only on the closest marker you are facing (horizontal angle, so looking up/down still counts).
         var label = el.DistanceLabel;
@@ -164,8 +164,8 @@ public static class CompassEnhancer
         entry.IsQuest = questPrefab && (!Settings.OverlayQuestsOnly || numbered);
         if (!entry.IsQuest) return;
         var iconT = rect.Find("QuestIcon(Clone)");
-        entry.Icon = iconT != null ? iconT.GetComponentInChildren<Image>() : null;
-        MelonLoader.MelonLogger.Msg($"[Compass] quest marker '{n}' icon={(entry.Icon != null ? entry.Icon.name : "none")}");
+        entry.Icon = iconT;
+        MelonLoader.MelonLogger.Msg($"[Compass] quest marker '{n}' icon={(entry.Icon != null ? entry.Icon.name + " children=" + entry.Icon.childCount : "none")}");
     }
 
     private static Entry GetEntry(RectTransform rect, Il2CppTMPro.TMP_Text label)

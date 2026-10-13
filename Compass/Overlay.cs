@@ -14,10 +14,13 @@ public static class Overlay
     private const float FeetPerUnit = 3.28084f;
     private const float EyeHeight = 1.7f; // measure distance from the player's feet, not the camera
 
-    private struct Item { public Vector3 Pos; public Sprite Sprite; public Color Color; }
+    private struct Item { public Vector3 Pos; public Transform Source; }
+
+    // One live clone of a vanilla icon object (circle + glyph children) per drawn item.
+    private class Slot { public GameObject Go; public RectTransform Rt; public CanvasGroup Group; public int SourceId; }
 
     private static readonly System.Collections.Generic.List<Item> Items = new();
-    private static readonly System.Collections.Generic.List<Image> Pool = new();
+    private static readonly System.Collections.Generic.List<Slot> Pool = new();
     private static RectTransform _root;
     private static Canvas _canvas;
 
@@ -32,10 +35,11 @@ public static class Overlay
 
     public static void BeginFrame() => Items.Clear();
 
-    /// <summary>Queue an icon above <paramref name="worldPos"/> for this frame. Distance fade is applied by the overlay.</summary>
-    public static void Submit(Vector3 worldPos, Sprite sprite, Color color)
+    /// <summary>Queue a copy of the vanilla icon object <paramref name="iconSource"/> above <paramref name="worldPos"/> for this frame.
+    /// Distance fade and global opacity are applied by the overlay.</summary>
+    public static void Submit(Vector3 worldPos, Transform iconSource)
     {
-        if (sprite != null) Items.Add(new Item { Pos = worldPos, Sprite = sprite, Color = color });
+        if (iconSource != null) Items.Add(new Item { Pos = worldPos, Source = iconSource });
     }
 
     public static void Render(Canvas hudCanvas, Camera cam)
@@ -55,12 +59,10 @@ public static class Overlay
             if (sp.z <= 0f || sp.x < 0f || sp.y < 0f || sp.x > Screen.width || sp.y > Screen.height) continue;
             if (!RectTransformUtility.ScreenPointToLocalPointInRectangle(_root, new Vector2(sp.x, sp.y), uiCam, out Vector2 local)) continue;
 
-            var img = GetIcon(used++);
-            img.sprite = item.Sprite;
-            img.color = new Color(item.Color.r, item.Color.g, item.Color.b, item.Color.a * alpha);
-            var rt = img.rectTransform;
-            rt.sizeDelta = new Vector2(Settings.OverlaySize, Settings.OverlaySize);
-            rt.localPosition = new Vector3(local.x, local.y, 0f);
+            var slot = GetSlot(used++, item.Source);
+            slot.Group.alpha = alpha * Settings.OverlayOpacity;
+            slot.Rt.sizeDelta = new Vector2(Settings.OverlaySize, Settings.OverlaySize);
+            slot.Rt.localPosition = new Vector3(local.x, local.y, 0f);
         }
         Hide(used);
         LastDrawn = used;
@@ -69,25 +71,31 @@ public static class Overlay
     private static void Hide(int from)
     {
         for (int i = from; i < Pool.Count; i++)
-            if (Pool[i] != null && Pool[i].gameObject.activeSelf) Pool[i].gameObject.SetActive(false);
+            if (Pool[i].Go != null && Pool[i].Go.activeSelf) Pool[i].Go.SetActive(false);
     }
 
-    private static Image GetIcon(int i)
+    private static Slot GetSlot(int i, Transform source)
     {
-        while (Pool.Count <= i)
+        while (Pool.Count <= i) Pool.Add(new Slot());
+        var slot = Pool[i];
+        int id = source.GetInstanceID();
+        if (slot.Go == null || slot.SourceId != id)
         {
-            var go = new GameObject("OverlayIcon");
-            go.transform.SetParent(_root, false);
-            var rt = go.AddComponent<RectTransform>();
-            rt.anchorMin = rt.anchorMax = rt.pivot = new Vector2(0.5f, 0.5f);
-            var img = go.AddComponent<Image>();
-            img.raycastTarget = false;
-            img.preserveAspect = true;
-            Pool.Add(img);
+            if (slot.Go != null) UnityEngine.Object.Destroy(slot.Go);
+            slot.Go = UnityEngine.Object.Instantiate(source.gameObject, _root);
+            slot.Go.name = "OverlayIcon";
+            slot.Go.SetActive(true);
+            slot.Rt = slot.Go.GetComponent<RectTransform>();
+            slot.Rt.anchorMin = slot.Rt.anchorMax = slot.Rt.pivot = new Vector2(0.5f, 0.5f);
+            slot.Rt.localScale = Vector3.one;
+            slot.Group = slot.Go.GetComponent<CanvasGroup>();
+            if (slot.Group == null) slot.Group = slot.Go.AddComponent<CanvasGroup>();
+            slot.Group.interactable = false;
+            slot.Group.blocksRaycasts = false;
+            slot.SourceId = id;
         }
-        var icon = Pool[i];
-        if (!icon.gameObject.activeSelf) icon.gameObject.SetActive(true);
-        return icon;
+        else if (!slot.Go.activeSelf) slot.Go.SetActive(true);
+        return slot;
     }
 
     private static void EnsureRoot(Canvas hudCanvas)

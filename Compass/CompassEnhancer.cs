@@ -116,7 +116,7 @@ public static class CompassEnhancer
             : 0f;
         foreach (var g in entry.Groups) if (g != null) g.alpha = fade;
 
-        // Overlay: quest objectives (named like "(3) Go to Gas-Mart (Inactive)") get an icon above them in the world.
+        // Overlay: quest objectives and landmarks (not NPCs) get an icon above them in the world.
         if (!entry.IconSearched) FindIcon(entry, rect, target);
         if (entry.IsQuest && entry.Icon != null && cm.CompassEnabled)
             Overlay.Submit(target.position, entry.Icon.sprite, entry.Icon.color);
@@ -158,7 +158,10 @@ public static class CompassEnhancer
     {
         entry.IconSearched = true;
         string n = target.name ?? "";
-        entry.IsQuest = n.Length > 2 && n[0] == '(' && char.IsDigit(n[1]);
+        // Quest objectives and map landmarks share the QuestElement prefab; NPCs use a different one.
+        bool questPrefab = (rect.name ?? "").StartsWith("QuestElement");
+        bool numbered = n.Length > 2 && n[0] == '(' && char.IsDigit(n[1]); // "(3) Go to Gas-Mart (Inactive)"
+        entry.IsQuest = questPrefab && (!Settings.OverlayQuestsOnly || numbered);
         if (!entry.IsQuest) return;
         var iconT = rect.Find("QuestIcon(Clone)");
         entry.Icon = iconT != null ? iconT.GetComponentInChildren<Image>() : null;

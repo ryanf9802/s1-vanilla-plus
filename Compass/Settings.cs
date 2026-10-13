@@ -5,6 +5,7 @@ namespace Compass;
 /// <summary>User-tweakable options, stored in UserData/MelonPreferences.cfg under [Compass].</summary>
 public static class Settings
 {
+    private static MelonPreferences_Entry<bool> _overlayQuestsOnly;
     private static MelonPreferences_Entry<float> _fadeStartFt, _maxDistanceFt, _minAlpha, _facingAngle, _chevronThresholdFt, _chevronSize,
         _overlayMaxFt, _overlayFadeStartFt, _overlayFadeEndFt, _overlayHeightFt, _overlaySize;
 
@@ -29,6 +30,8 @@ public static class Settings
     /// <summary>How far above the target the icon floats.</summary>
     public static float OverlayHeightFt => _overlayHeightFt.Value;
     public static float OverlaySize => _overlaySize.Value;
+    /// <summary>If true, only numbered quest objectives get overlay icons; if false, map landmarks do too.</summary>
+    public static bool OverlayQuestsOnly => _overlayQuestsOnly.Value;
 
     public static void Init()
     {
@@ -42,6 +45,7 @@ public static class Settings
         _overlayFadeStartFt = c.CreateEntry("OverlayFadeStartFt", 6f, description: "Overlay icons start fading out when closer than this many feet");
         _overlayFadeEndFt = c.CreateEntry("OverlayFadeEndFt", 2f, description: "Overlay icons are fully invisible at this many feet or closer");
         _overlayHeightFt = c.CreateEntry("OverlayHeightFt", 6.5f, description: "How many feet above the target the overlay icon floats");
+        _overlayQuestsOnly = c.CreateEntry("OverlayQuestsOnly", false, description: "true: only numbered quest objectives get overlay icons; false: map landmarks too (NPCs never do)");
         _overlaySize = c.CreateEntry("OverlaySize", 28f, description: "Overlay icon size in UI pixels");
         _chevronSize = c.CreateEntry("ChevronSize", 8f, description: "Chevron size in UI pixels");
     }

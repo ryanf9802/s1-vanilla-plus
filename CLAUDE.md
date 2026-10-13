@@ -29,7 +29,13 @@ The overall plan lives outside the repo at `~/.claude/plans/just-do-inspection-a
 - **Console freeze gotcha:** the MelonLoader console window is a Windows console in select mode when clicked, and that blocks the game's log writes, so the game looks crashed or hung (often on the loading screen). The title bar then reads "Select ...". Launching with `--melonloader.hideconsole` avoids it; the template's post-build launch does not pass that flag. Logs are read from `MelonLoader\Logs` instead (see memory note on log reading).
 - Settings are written to `UserData\MelonPreferences.cfg` only on a clean game exit; force-quitting skips that, and saved values override new code defaults, so delete or edit stale entries when changing a default.
 
+## Settings and distribution
+
+- Settings (`Compass/Settings.cs`) follow the Mods App (k0Mods, github.com/k073l/s1-modsapp) conventions so it can show them in-game: every entry has a display name, description and, for numbers, a `ValueRange`; category identifiers start with the MelonInfo mod name (`Compass`, `Compass_Overlay`). Values are read live, so edits apply immediately. New settings must follow this pattern.
+- Package for Thunderstore/Nexus (IL2CPP only; there is no Mono build here): from `Compass/`, build then `uv run --script assets/package.py --skip-mono`, output `Compass/dist/Compass.zip` (gitignored). Version lives in `Compass.csproj`, `MainMod.cs` (BuildInfo), `assets/manifest.json` and `assets/fomod/info.xml`; `assets/bumper.py` can bump them together. Thunderstore package name is `CompassPlus`; its dependency is `LavaGang-MelonLoader-0.7.3`.
+- Other compass mods on Thunderstore overlap with this one (BetterCompass, AlwaysShowDistancesOnCompass, CompassWaypointsonscreen); noted in the README.
+
 ## Roadmap / deferred
 
-- **Settings UI (user-approved direction, not started):** expose settings for both Compass and Ping through the community Mod Manager phone app (reportedly reads MelonLoader preferences; unverified, research how it discovers entries first). Add min/max validation to entries in `Compass/Settings.cs`. Settings are read live each frame, so UI changes apply immediately. Remind the user to revisit this.
+- **Settings UI:** Compass settings are now Mods App-ready (see above); still to verify in-game with the Mods App installed, and to do the same for Ping.
 - **Marker overlay (proposed, not started):** world-space marker shown above a target within ~50ft, through walls, used by both Compass (nearby markers) and Ping. Plan: lives inside the Compass mod as a public marker API with a screen-space overlay canvas (project with `Camera.WorldToScreenPoint`); Ping depends on Compass rather than a third mod.

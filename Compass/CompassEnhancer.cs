@@ -76,6 +76,7 @@ public static class CompassEnhancer
             if (!IsFacing(camT, toTarget)) continue;
             int id = rect.GetInstanceID();
             float d = toTarget.magnitude;
+            if (d * FeetPerUnit > Settings.MaxDistanceFt) continue;
             if (d < bestDist) { bestDist = d; best = id; }
             if (id == _lastWinner) { previous = id; previousDist = d; }
         }
@@ -91,12 +92,16 @@ public static class CompassEnhancer
         if (target == null || rect == null || !el.Visible) return;
         Applied++;
 
-        var entry = GetEntry(rect);
+        var entry = GetEntry(rect, el.DistanceLabel);
         Vector3 toTarget = target.position - camT.position;
         float dist = toTarget.magnitude;
 
-        // Distance fade on our own layer.
-        float fade = Mathf.Lerp(1f, Settings.MinAlpha, Mathf.InverseLerp(Settings.FadeStart, Settings.FadeEnd, dist));
+        // Distance fade on our own layer: hidden past MaxDistanceFt, MinAlpha at it, opaque inside FadeStartFt.
+        float distFt = dist * FeetPerUnit;
+        bool inRange = distFt <= Settings.MaxDistanceFt;
+        float fade = inRange
+            ? Mathf.Lerp(1f, Settings.MinAlpha, Mathf.InverseLerp(Settings.FadeStartFt, Settings.MaxDistanceFt, distFt))
+            : 0f;
         foreach (var g in entry.Groups) if (g != null) g.alpha = fade;
 
         // Label: only on the closest marker you are facing (horizontal angle, so looking up/down still counts).
@@ -113,37 +118,48 @@ public static class CompassEnhancer
             label.alpha = Mathf.MoveTowards(label.alpha, facing ? 1f : 0f, Time.deltaTime * 8f);
         }
 
-        // Elevation chevron.
+        // Elevation chevron: sits right after the distance label, only while that label is shown.
         if (entry.Chevron != null)
         {
             float dy = toTarget.y;
-            bool show = Mathf.Abs(dy) >= Settings.ChevronThresholdFt / FeetPerUnit;
+            bool show = label != null && inRange && rect.GetInstanceID() == labelWinner
+                        && Mathf.Abs(dy) >= Settings.ChevronThresholdFt / FeetPerUnit;
             if (entry.Chevron.enabled != show) entry.Chevron.enabled = show;
-            if (show) entry.ChevronRect.localRotation = Quaternion.Euler(0f, 0f, dy > 0f ? 0f : 180f);
+            if (show)
+            {
+                var b = label.textBounds;
+                float size = Settings.ChevronSize;
+                entry.ChevronRect.sizeDelta = new Vector2(size, size);
+                entry.ChevronRect.localPosition = new Vector3(b.max.x + 2f + size * 0.5f, b.center.y, 0f);
+                entry.ChevronRect.localRotation = Quaternion.Euler(0f, 0f, dy > 0f ? 0f : 180f);
+                entry.Chevron.color = new Color(1f, 1f, 1f, 0.9f * label.alpha);
+            }
         }
     }
 
-    private static Entry GetEntry(RectTransform rect)
+    private static Entry GetEntry(RectTransform rect, Il2CppTMPro.TMP_Text label)
     {
         int id = rect.GetInstanceID();
         if (Entries.TryGetValue(id, out var existing) && existing.Rect != null) return existing;
 
         var entry = new Entry { Rect = rect };
 
-        var go = new GameObject("CompassChevron");
-        go.transform.SetParent(rect, false);
-        var cr = go.AddComponent<RectTransform>();
-        cr.anchorMin = cr.anchorMax = new Vector2(1f, 1f);
-        cr.pivot = new Vector2(0.5f, 0.5f);
-        cr.anchoredPosition = Vector2.zero;
-        cr.sizeDelta = new Vector2(Settings.ChevronSize, Settings.ChevronSize);
-        var img = go.AddComponent<Image>();
-        img.sprite = GetChevronSprite();
-        img.color = new Color(1f, 1f, 1f, 0.9f);
-        img.raycastTarget = false;
-        img.enabled = false;
-        entry.Chevron = img;
-        entry.ChevronRect = cr;
+        if (label != null)
+        {
+            var go = new GameObject("CompassChevron");
+            go.transform.SetParent(label.transform, false);
+            var cr = go.AddComponent<RectTransform>();
+            cr.anchorMin = cr.anchorMax = new Vector2(0.5f, 0.5f);
+            cr.pivot = new Vector2(0.5f, 0.5f);
+            cr.sizeDelta = new Vector2(Settings.ChevronSize, Settings.ChevronSize);
+            var img = go.AddComponent<Image>();
+            img.sprite = GetChevronSprite();
+            img.color = new Color(1f, 1f, 1f, 0.9f);
+            img.raycastTarget = false;
+            img.enabled = false;
+            entry.Chevron = img;
+            entry.ChevronRect = cr;
+        }
 
         // Our fade goes on child groups; the element's own group belongs to vanilla.
         var names = new System.Text.StringBuilder();

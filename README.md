@@ -1,18 +1,26 @@
 # schedule_one
 
-Vanilla+ quality-of-life mods for [Schedule I](https://store.steampowered.com/app/3164500/), built with C# and MelonLoader (IL2CPP branch).
+Vanilla+ quality-of-life mods for [Schedule I](https://store.steampowered.com/app/3164500/), built with C# and [MelonLoader](https://github.com/LavaGang/MelonLoader) for the default (IL2CPP) Steam branch.
 
-## Planned mods
+## Mods
 
-- **Compass**: vanilla compass plus distance and elevation per marker.
-- **Ping**: co-op ping with a keybind, per-player colors, a sound, and a 5 second marker on the compass.
+| Mod | Status | Description |
+|---|---|---|
+| [Compass+](Compass/) | 0.1.0 | Distance fade, look-to-reveal distance labels, elevation chevrons and through-wall quest icons for the vanilla compass. |
+| Ping | planned | Co-op ping on a keybind, shown on the compass and as an overlay icon. |
 
-## Status
+Download the latest build from [Releases](https://github.com/ryanf9802/schedule_one/releases).
 
-Early setup. No mods have been built yet.
+## Building
 
-## Requirements
+Requires the .NET 8 SDK and a MelonLoader 0.7.3 install of the game. Set the game path in `Compass/build/paths.props`, then:
 
-- Schedule I, default (IL2CPP) Steam branch
-- [MelonLoader](https://github.com/LavaGang/MelonLoader) 0.7.3
-- .NET SDK 8
+    dotnet build Compass/Compass.csproj -c IL2CPP
+
+The template's post-build step copies the DLL into the game's `Mods` folder and relaunches the game; add `-p:RunPostBuildEvent=Never` to only compile.
+
+To make a release package: `cd Compass && uv run --script assets/package.py --skip-mono`.
+
+## License
+
+MIT. See [Compass/LICENSE.md](Compass/LICENSE.md).

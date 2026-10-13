@@ -56,6 +56,15 @@ public static class Overlay
         if (hudCanvas == null || cam == null) { Hide(0); return; }
         EnsureRoot(hudCanvas);
         EnsureNameLabel(styleSource);
+        if (PhoneOpen())
+        {
+            // The overlay canvas draws above the phone UI, so step aside while the phone is up.
+            FrameIconPos.Clear();
+            UpdateNameLabel(null, 0);
+            Hide(0);
+            LastDrawn = 0;
+            return;
+        }
         Vector3 feet = cam.transform.position - new Vector3(0f, EyeHeight, 0f);
         Vector3 lift = new(0f, Settings.OverlayHeightFt / FeetPerUnit, 0f);
         Camera uiCam = _canvas.renderMode == RenderMode.ScreenSpaceOverlay ? null : _canvas.worldCamera;
@@ -94,6 +103,16 @@ public static class Overlay
         UpdateNameLabel(lookName, lookKey);
         Hide(used);
         LastDrawn = used;
+    }
+
+    private static bool PhoneOpen()
+    {
+        try
+        {
+            var phone = Il2CppScheduleOne.UI.Phone.Phone.Instance;
+            return phone != null && phone.IsOpen;
+        }
+        catch { return false; }
     }
 
     private static void UpdateNameLabel(string name, int key)

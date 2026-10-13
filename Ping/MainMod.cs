@@ -9,7 +9,7 @@ using UnityEngine;
 [assembly: MelonInfo(typeof(Ping.Ping), Ping.BuildInfo.Name, Ping.BuildInfo.Version, Ping.BuildInfo.Author)]
 [assembly: MelonColor(1, 255, 0, 0)]
 [assembly: MelonGame("TVGS", "Schedule I")]
-[assembly: MelonAdditionalDependencies("Compass")]
+[assembly: MelonAdditionalDependencies("Compass-IL2CPP")]
 [assembly: MelonPlatformDomain(MelonPlatformDomainAttribute.CompatibleDomains.IL2CPP)]
 
 namespace Ping;

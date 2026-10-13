@@ -27,7 +27,7 @@ public static class BuildInfo
     public const string Name = "Compass";
     public const string Description = "Vanilla+ compass with distance and elevation markers";
     public const string Author = "ryanf9802";
-    public const string Version = "1.0.0";
+    public const string Version = "0.1.0";
 }
 
 public class Compass : MelonMod
@@ -59,7 +59,7 @@ public class Compass : MelonMod
         yield return new WaitForSeconds(10f);
         while (true)
         {
-            try { DumpCompass(); }
+            try { if (Settings.DebugLogging) DumpCompass(); }
             catch (System.Exception e) { Logger.Error($"Probe failed: {e}"); }
             yield return new WaitForSeconds(8f);
         }

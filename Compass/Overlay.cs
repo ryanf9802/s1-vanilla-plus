@@ -25,6 +25,7 @@ public static class Overlay
     private static Canvas _canvas;
     private static Il2CppTMPro.TextMeshProUGUI _nameLabel;
     private static RectTransform _nameRect;
+    private static float _nameBaseFontSize;
     private static int _nameKey;                                   // source id of the icon the name belongs to
     private static readonly System.Collections.Generic.Dictionary<int, Vector3> FrameIconPos = new();
 
@@ -97,6 +98,8 @@ public static class Overlay
     private static void UpdateNameLabel(string name, int key)
     {
         if (_nameLabel == null) return;
+        float fontSize = _nameBaseFontSize * Settings.OverlayNameScale;
+        if (!Mathf.Approximately(_nameLabel.fontSize, fontSize)) _nameLabel.fontSize = fontSize;
         bool looking = name != null && Settings.OverlayShowNames;
         if (looking)
         {
@@ -123,7 +126,7 @@ public static class Overlay
         _nameLabel = go.AddComponent<Il2CppTMPro.TextMeshProUGUI>();
         _nameLabel.font = src.font;
         _nameLabel.fontSharedMaterial = src.fontSharedMaterial;
-        _nameLabel.fontSize = src.fontSize * Settings.OverlayNameScale;
+        _nameBaseFontSize = src.fontSize;
         _nameLabel.color = src.color;
         _nameLabel.alignment = Il2CppTMPro.TextAlignmentOptions.Center;
         _nameLabel.raycastTarget = false;

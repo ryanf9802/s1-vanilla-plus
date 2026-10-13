@@ -1,4 +1,8 @@
 # Changelog
 
-## 1.0.0
-- initial
+## 0.1.0
+- Compass markers fade with distance and hide past a configurable maximum.
+- Distance labels appear when facing a marker, only for the closest one in view.
+- Elevation chevron after the distance label.
+- Through-wall overlay icons for quest markers and landmarks, with fade in/out and a name shown while looked at.
+- All settings exposed through MelonPreferences with ranges, ready for the Mods App.

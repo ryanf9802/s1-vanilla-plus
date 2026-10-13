@@ -15,7 +15,7 @@
 
         <RootNamespace>Compass</RootNamespace>
 
-        <Version>1.0.0</Version>
+        <Version>0.1.0</Version>
         <Author>ryanf9802</Author>
         <Description>Vanilla+ compass with distance and elevation markers</Description>
 

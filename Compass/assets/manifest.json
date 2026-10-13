@@ -1,10 +1,9 @@
 {
-    "name": "Compass",
-    "version_number": "1.0.0",
+    "name": "CompassPlus",
+    "version_number": "0.1.0",
     "website_url": "",
-    "description": "does stuff i guess",
+    "description": "Vanilla+ compass for Schedule I: distance fade, face-to-reveal distance labels, elevation chevrons, and through-wall quest marker icons with names.",
     "dependencies": [
-        "LavaGang-MelonLoader-0.7.0",
-        "the_croods-SwapperPlugin-1.2.2"
+        "LavaGang-MelonLoader-0.7.3"
     ]
 }

@@ -66,7 +66,7 @@ public static class Settings
         _debugLogging = c.CreateEntry("DebugLogging", false, "Debug logging", "Log compass state to the MelonLoader log every few seconds. Leave off unless troubleshooting.");
 
         var o = MelonPreferences.CreateCategory("Compass_Overlay", "Compass - Overlay icons");
-        _overlayMaxFt = Float(o, "OverlayMaxFt", 75f, "Show within (ft)", "Overlay icons appear above quest markers and landmarks within this distance, even through walls.", 10f, 500f);
+        _overlayMaxFt = Float(o, "OverlayMaxFt", 100f, "Show within (ft)", "Overlay icons appear above quest markers and landmarks within this distance, even through walls.", 10f, 500f);
         _overlayFadeInFt = Float(o, "OverlayFadeInFt", 16.4f, "Fade-in distance (ft)", "Icons fade in over this many feet after entering range, so they don't pop in.", 0f, 100f);
         _overlayFadeStartFt = Float(o, "OverlayFadeStartFt", 6f, "Start fading out at (ft)", "Icons begin fading out when you are closer than this.", 0f, 50f);
         _overlayFadeEndFt = Float(o, "OverlayFadeEndFt", 2f, "Fully hidden at (ft)", "Icons are invisible at this distance or closer.", 0f, 50f);

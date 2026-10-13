@@ -14,10 +14,10 @@ public static class Overlay
     private const float FeetPerUnit = 3.28084f;
     private const float EyeHeight = 1.7f; // measure distance from the player's feet, not the camera
 
-    private struct Item { public Vector3 Pos; public Transform Source; public string Name; public Color? Tint; public float AlphaMul; }
+    private struct Item { public Vector3 Pos; public Transform Source; public string Name; public Color? Tint; public float AlphaMul; public bool Always; }
 
     // One live clone of a vanilla icon object (circle + glyph children) per drawn item.
-    private class Slot { public GameObject Go; public RectTransform Rt; public CanvasGroup Group; public Image Root; public int SourceId; }
+    private class Slot { public GameObject Go; public RectTransform Rt; public CanvasGroup Group; public Image Disc; public int SourceId; }
 
     private static readonly System.Collections.Generic.List<Item> Items = new();
     private static readonly System.Collections.Generic.List<Slot> Pool = new();
@@ -45,10 +45,10 @@ public static class Overlay
     public static void BeginFrame() => Items.Clear();
 
     /// <summary>Queue a copy of the vanilla icon object <paramref name="iconSource"/> above <paramref name="worldPos"/> for this frame.
-    /// Distance fade and global opacity are applied by the overlay.</summary>
-    public static void Submit(Vector3 worldPos, Transform iconSource, string name = null, Color? tint = null, float alphaMul = 1f)
+    /// Distance fade and global opacity are applied by the overlay, unless <paramref name="alwaysVisible"/> (full opacity at any range).</summary>
+    public static void Submit(Vector3 worldPos, Transform iconSource, string name = null, Color? tint = null, float alphaMul = 1f, bool alwaysVisible = false)
     {
-        if (iconSource != null) Items.Add(new Item { Pos = worldPos, Source = iconSource, Name = name, Tint = tint, AlphaMul = alphaMul });
+        if (iconSource != null) Items.Add(new Item { Pos = worldPos, Source = iconSource, Name = name, Tint = tint, AlphaMul = alphaMul, Always = alwaysVisible });
     }
 
     public static void Render(Canvas hudCanvas, Camera cam, Il2CppTMPro.TMP_Text styleSource)
@@ -77,17 +77,19 @@ public static class Overlay
         var screenCenter = new Vector2(Screen.width * 0.5f, Screen.height * 0.5f);
         foreach (var item in Items)
         {
-            float alpha = AlphaForDistanceFt(Vector3.Distance(feet, item.Pos) * FeetPerUnit);
+            float alpha = item.Always ? 1f : AlphaForDistanceFt(Vector3.Distance(feet, item.Pos) * FeetPerUnit);
             if (alpha <= 0.01f) continue;
-            Vector3 sp = cam.WorldToScreenPoint(item.Pos + lift);
+            Vector3 sp = cam.WorldToScreenPoint(item.Always ? item.Pos : item.Pos + lift);
             if (sp.z <= 0f || sp.x < 0f || sp.y < 0f || sp.x > Screen.width || sp.y > Screen.height) continue;
             if (!RectTransformUtility.ScreenPointToLocalPointInRectangle(_root, new Vector2(sp.x, sp.y), uiCam, out Vector2 local)) continue;
 
             var slot = GetSlot(used++, item.Source);
-            slot.Group.alpha = alpha * Settings.OverlayOpacity * item.AlphaMul;
-            if (item.Tint.HasValue && slot.Root != null) slot.Root.color = item.Tint.Value;
+            slot.Group.alpha = (item.Always ? 1f : alpha * Settings.OverlayOpacity) * item.AlphaMul;
+            if (item.Tint.HasValue && slot.Disc != null) slot.Disc.color = item.Tint.Value;
             slot.Rt.sizeDelta = new Vector2(Settings.OverlaySize, Settings.OverlaySize);
-            slot.Rt.localPosition = new Vector3(local.x, local.y, 0f);
+            // Pings sit on the spot itself: lift the icon by the pin's height so its tip lands on the point.
+            float tipLift = item.Always ? Settings.OverlaySize * 0.57f : 0f;
+            slot.Rt.localPosition = new Vector3(local.x, local.y + tipLift, 0f);
 
             FrameIconPos[item.Source.GetInstanceID()] = slot.Rt.localPosition;
 
@@ -174,7 +176,12 @@ public static class Overlay
             slot.Rt = slot.Go.GetComponent<RectTransform>();
             slot.Rt.anchorMin = slot.Rt.anchorMax = slot.Rt.pivot = new Vector2(0.5f, 0.5f);
             slot.Rt.localScale = Vector3.one;
-            slot.Root = slot.Go.GetComponent<Image>();
+            slot.Disc = null; // the colored shape: first image on a child other than the distance label
+            for (int c = 0; c < slot.Rt.childCount && slot.Disc == null; c++)
+            {
+                var child = slot.Rt.GetChild(c);
+                if (child.name != "Text") slot.Disc = child.GetComponent<Image>();
+            }
             slot.Group = slot.Go.GetComponent<CanvasGroup>();
             if (slot.Group == null) slot.Group = slot.Go.AddComponent<CanvasGroup>();
             slot.Group.interactable = false;

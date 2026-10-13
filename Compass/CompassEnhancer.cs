@@ -117,8 +117,9 @@ public static class CompassEnhancer
         float distFt = dist * FeetPerUnit;
         bool isApiMarker = CompassApi.IsMarkerTarget(target);
         bool inRange = isApiMarker || distFt <= Settings.MaxDistanceFt;
-        float fade = inRange
-            ? Mathf.Lerp(1f, Settings.MinAlpha, Mathf.InverseLerp(Settings.FadeStartFt, Settings.MaxDistanceFt, distFt)) * CompassApi.LifetimeAlpha(target)
+        float fade = isApiMarker ? CompassApi.LifetimeAlpha(target) // pings: full opacity at any range until they expire
+            : inRange
+            ? Mathf.Lerp(1f, Settings.MinAlpha, Mathf.InverseLerp(Settings.FadeStartFt, Settings.MaxDistanceFt, distFt)) 
             : 0f;
         foreach (var g in entry.Groups) if (g != null) g.alpha = fade;
 

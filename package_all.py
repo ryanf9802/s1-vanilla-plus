@@ -31,7 +31,8 @@ def main() -> int:
     ap.add_argument("--version", help="bundle version (default: highest mod version)")
     args = ap.parse_args()
 
-    mods = sorted(p.parent.parent for p in root.glob("*/assets/package.py"))
+    # A mod folder containing an `.unreleased` file is still experimental and is left out of every package.
+    mods = sorted(p.parent.parent for p in root.glob("*/assets/package.py") if not (p.parent.parent / ".unreleased").exists())
     if not mods:
         print("no mods found")
         return 1

@@ -23,6 +23,6 @@ The overall plan lives outside the repo at `~/.claude/plans/just-do-inspection-a
 
 ## Notes
 
-- Build (from `/tmp`, via Windows dotnet; the project path must be a Windows/UNC path): `powershell.exe -NoProfile -Command "& 'C:\Program Files\dotnet\dotnet.exe' build '<win path>\Compass\Compass.csproj' -c IL2CPP"`. The template's post-build step copies the DLL into the game's `Mods` folder **and launches the game**. There are no tests or linters.
+- Build (from `/tmp`, via Windows dotnet; the project path must be a Windows/UNC path): `powershell.exe -NoProfile -Command "& 'C:\Program Files\dotnet\dotnet.exe' build '<win path>\Compass\Compass.csproj' -c IL2CPP"`. The template's post-build step force-kills any running game (`taskkill /F`), copies the DLL into the game's `Mods` folder, **and relaunches the game**. To compile only without disturbing a running game, add `-p:RunPostBuildEvent=Never` and filter output with `| Select-String 'error|Build succeeded'` (the optional-assembly warnings are noisy). There are no tests or linters.
 - Mod projects come from the template (`dotnet new S1MelonMod -n <Name> -S <game dir> -S1 <game dir>`); game paths live in `<Mod>/build/paths.props`. The vanilla `CompassManager` already supports per-target elements, so build on it; see `docs/recon.md` for findings and the decompile workflow.
 - Game updates can break Harmony patches and mod network sync, so record the game build id (currently 25796331) and library versions in the README when pinning.

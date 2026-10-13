@@ -2,11 +2,7 @@ using System.Collections;
 using MelonLoader;
 using Compass.Helpers;
 using UnityEngine;
-#if MONO
-using FishNet;
-#else
-using Il2CppFishNet;
-#endif
+using Il2CppScheduleOne.UI.Compass;
 
 [assembly: MelonInfo(
     typeof(Compass.Compass),
@@ -54,10 +50,33 @@ public class Compass : MelonMod
         }
     }
 
+    // Recon probe: periodically log the vanilla compass state so we can learn how elements behave.
     private IEnumerator DoStuff()
     {
-        Logger.Msg("Player ready, doing stuff...");
-        yield return new WaitForSeconds(2f);
-        Logger.Msg("Did some stuff!");
+        yield return new WaitForSeconds(10f);
+        while (true)
+        {
+            try { DumpCompass(); }
+            catch (System.Exception e) { Logger.Error($"Probe failed: {e}"); }
+            yield return new WaitForSeconds(15f);
+        }
+    }
+
+    private static void DumpCompass()
+    {
+        var cm = CompassManager.Instance;
+        if (cm == null) { Logger.Msg("[probe] CompassManager.Instance is null"); return; }
+        var camPos = cm.cam != null ? cm.cam.position : Vector3.zero;
+        Logger.Msg($"[probe] enabled={cm.CompassEnabled} range={cm.CompassUIRange} fullAlphaRange={cm.FullAlphaRange} angleDiv={cm.AngleDivisor} " +
+                   $"labelThreshold={CompassManager.DISTANCE_LABEL_THRESHOLD} notches={CompassManager.NOTCH_COUNT} elements={cm.elements.Count} cam={camPos}");
+        foreach (var el in cm.elements)
+        {
+            var t = el.TargetTransform;
+            var label = el.DistanceLabel;
+            string dist = t != null ? Vector3.Distance(camPos, t.position).ToString("F1") : "n/a";
+            Logger.Msg($"[probe]  el target='{(t != null ? t.name : "null")}' pos={(t != null ? t.position.ToString() : "n/a")} dist={dist} " +
+                       $"visible={el.Visible} labelText='{(label != null ? label.text : "null")}' labelActive={(label != null && label.gameObject.activeInHierarchy)} " +
+                       $"alpha={(el.Group != null ? el.Group.alpha : -1f)}");
+        }
     }
 }

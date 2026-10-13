@@ -20,3 +20,6 @@ UserLibs/
 
 # Claude Code local settings
 .claude/settings.local.json
+
+# Packaging output
+dist/

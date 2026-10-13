@@ -1,5 +1,8 @@
 # Changelog
 
+## 0.2.3
+- Version bump to match Ping 0.2.3.
+
 ## 0.2.2
 - Through-wall icons for other players are now off by default (`PlayersOnOverlay`).
 

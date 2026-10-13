@@ -2,7 +2,7 @@
 <fomod>
     <Name>Ping</Name>
     <Author>ryanf9802</Author>
-    <Version>0.2.2</Version>
+    <Version>0.2.3</Version>
     <Website>https://github.com/ryanf9802/s1-vanilla-plus</Website>
     <Description>Co-op ping for Schedule I: press a key to mark where you look. Partners see a color-coded marker on the compass and through walls, with a sound.</Description>
 </fomod>

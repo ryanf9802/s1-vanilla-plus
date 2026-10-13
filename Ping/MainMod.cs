@@ -19,7 +19,7 @@ public static class BuildInfo
     public const string Name = "Ping";
     public const string Description = "Co-op ping with per-player colors, shown on the vanilla compass";
     public const string Author = "ryanf9802";
-    public const string Version = "0.2.2";
+    public const string Version = "0.2.3";
 }
 
 /// <summary>
@@ -135,11 +135,11 @@ public class Ping : MelonMod
 
         Vector3 pos = point + normal * 0.15f;
         ulong me = _networkReady ? _client.LocalPlayerId64 : 0UL;
-        ShowPing(pos, me, "You");
+        ShowPing(pos, me, "You", Il2CppScheduleOne.PlayerScripts.Player.Local?.PlayerName);
 
         if (_networkReady && _client.IsInLobby)
         {
-            _ = _client.BroadcastMessageAsync(new PingMessage(new PingPayload { X = pos.x, Y = pos.y, Z = pos.z }));
+            _ = _client.BroadcastMessageAsync(new PingMessage(new PingPayload { X = pos.x, Y = pos.y, Z = pos.z, Name = Il2CppScheduleOne.PlayerScripts.Player.Local?.PlayerName }));
         }
     }
 
@@ -159,8 +159,10 @@ public class Ping : MelonMod
             if (_lastFromSender.TryGetValue(id, out float last) && now - last < 0.15f) return;
             _lastFromSender[id] = now;
 
-            string name = _client.TryGetMember(id, out var member) && member != null ? member.DisplayName : "Partner";
-            ShowPing(new Vector3(p.X, p.Y, p.Z), id, name);
+            // The in-game name is what the compass markers and colors are keyed on; the Steam name may differ.
+            string gameName = CleanName(p.Name);
+            string steamName = _client.TryGetMember(id, out var member) && member != null ? member.DisplayName : "Partner";
+            ShowPing(new Vector3(p.X, p.Y, p.Z), id, gameName ?? steamName, gameName);
         }
         catch (System.Exception e)
         {
@@ -172,14 +174,21 @@ public class Ping : MelonMod
 
     // --- presenting -------------------------------------------------------------------------------------------------
 
-    private void ShowPing(Vector3 pos, ulong playerId, string name)
+    /// <summary>Names come from other players' machines: bound the length and drop characters that could inject rich-text tags.</summary>
+    private static string CleanName(string n)
+    {
+        if (string.IsNullOrWhiteSpace(n)) return null;
+        n = n.Replace("<", "").Replace(">", "").Trim();
+        if (n.Length > 32) n = n.Substring(0, 32);
+        return n.Length == 0 ? null : n;
+    }
+
+    private void ShowPing(Vector3 pos, ulong playerId, string label, string inGameName)
     {
         // Same color as that player's compass marker: ranked by in-game name; fall back to Steam ID rank if the name is unknown.
-        string colorName = playerId == (_networkReady ? _client.LocalPlayerId64 : 0UL) || name == "You"
-            ? Il2CppScheduleOne.PlayerScripts.Player.Local?.PlayerName : name;
-        int index = Compass.PlayerColors.IndexFor(colorName);
+        int index = Compass.PlayerColors.IndexFor(inGameName);
         if (index < 0) index = ColorIndex(playerId);
-        CompassApi.AddMarker(pos, Palette[index], Settings.LifetimeSeconds, name, Settings.OnCompass, Settings.OnOverlay);
+        CompassApi.AddMarker(pos, Palette[index], Settings.LifetimeSeconds, label, Settings.OnCompass, Settings.OnOverlay);
         PingSound.Play(index, pos);
     }
 

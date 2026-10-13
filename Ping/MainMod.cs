@@ -134,10 +134,10 @@ public class Ping : MelonMod
         int mask = ~(1 << 2); // everything except "Ignore Raycast"
         int playerLayer = LayerMask.NameToLayer("Player");
         if (playerLayer >= 0) mask &= ~(1 << playerLayer); // and not ourselves
-        if (!Physics.Raycast(cam.transform.position, cam.transform.forward, out RaycastHit hit, maxUnits, mask, QueryTriggerInteraction.Ignore))
+        if (!PingRaycast.Cast(cam.transform.position, cam.transform.forward, maxUnits, mask, out Vector3 point, out Vector3 normal))
             return;
 
-        Vector3 pos = hit.point + hit.normal * 0.15f;
+        Vector3 pos = point + normal * 0.15f;
         ulong me = _networkReady ? _client.LocalPlayerId64 : 0UL;
         ShowPing(pos, me, "You");
 

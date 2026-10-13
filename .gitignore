@@ -1,0 +1,22 @@
+# .NET build output
+bin/
+obj/
+*.user
+*.suo
+.vs/
+.idea/
+*.nupkg
+
+# Local machine config (game paths)
+Directory.Build.props.user
+*.local.props
+
+# Game files must never be committed
+*Assembly-CSharp*.dll
+Il2CppAssemblies/
+MelonLoader/
+Mods/
+UserLibs/
+
+# Claude Code local settings
+.claude/settings.local.json

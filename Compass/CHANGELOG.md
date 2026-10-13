@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.2.1
 - Other players (co-op partners) show on the compass and as through-wall icons, each in their own color (`ShowPlayers`, `PlayersOnOverlay`).
 - New API: `CompassApi.AddTrackedMarker` follows a transform; markers can use the `Person` icon. `PlayerColors` gives a per-player color shared with Ping.
 

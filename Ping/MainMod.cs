@@ -19,7 +19,7 @@ public static class BuildInfo
     public const string Name = "Ping";
     public const string Description = "Co-op ping with per-player colors, shown on the vanilla compass";
     public const string Author = "ryanf9802";
-    public const string Version = "0.2.0";
+    public const string Version = "0.2.1";
 }
 
 /// <summary>

@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.2.1
 - Ping colors now match the player's compass marker (ranked by in-game name via Compass+).
 
 ## 0.2.0

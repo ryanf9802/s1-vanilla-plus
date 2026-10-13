@@ -2,7 +2,7 @@
 <fomod>
     <Name>Compass</Name>
     <Author>ryanf9802</Author>
-    <Version>0.2.0</Version>
+    <Version>0.2.1</Version>
     <Website>https://github.com/ryanf9802/s1-vanilla-plus</Website>
     <Description>Vanilla+ compass for Schedule I: distance fade, face-to-reveal distance labels, elevation chevrons, and through-wall quest marker icons with names.</Description>
 </fomod>

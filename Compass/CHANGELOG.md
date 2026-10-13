@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.3.0
 - Recruited dealers show on the compass with their phone-map portrait in a green round frame (`ShowDealers`; a green sack icon if the game has no portrait), with an optional through-wall icon (`DealersOnOverlay`, off by default).
 
 ## 0.2.5

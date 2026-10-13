@@ -1,5 +1,8 @@
 # Changelog
 
+## 0.3.0
+- Version bump to match Compass+ 0.3.0 (dealer markers).
+
 ## 0.2.5
 - Version bump to match Compass+ 0.2.5 (icon fix).
 

@@ -41,7 +41,7 @@ public class Compass : MelonMod
         Logger.Msg("Compass initialized");
     }
 
-    public override void OnLateUpdate() => ElevationPatch.Fallback();
+    public override void OnLateUpdate() => CompassEnhancer.Tick();
 
     public override void OnSceneWasLoaded(int buildIndex, string sceneName)
     {
@@ -71,7 +71,7 @@ public class Compass : MelonMod
         if (cm == null) { Logger.Msg("[probe] CompassManager.Instance is null"); return; }
         var camPos = cm.cam != null ? cm.cam.position : Vector3.zero;
         Logger.Msg($"[probe] enabled={cm.CompassEnabled} range={cm.CompassUIRange} fullAlphaRange={cm.FullAlphaRange} angleDiv={cm.AngleDivisor} " +
-                   $"labelThreshold={CompassManager.DISTANCE_LABEL_THRESHOLD} notches={CompassManager.NOTCH_COUNT} elements={cm.elements.Count} cam={camPos} hook(calls={ElevationPatch.Calls} applied={ElevationPatch.Applied} failed={ElevationPatch.Failed} harmonyFrames={ElevationPatch.HarmonyFrames} fallbackFrames={ElevationPatch.FallbackFrames})");
+                   $"labelThreshold={CompassManager.DISTANCE_LABEL_THRESHOLD} notches={CompassManager.NOTCH_COUNT} elements={cm.elements.Count} cam={camPos} enhancer(frames={CompassEnhancer.Frames} applied={CompassEnhancer.Applied} failed={CompassEnhancer.Failed})");
         foreach (var el in cm.elements)
         {
             if (!el.Visible) continue;

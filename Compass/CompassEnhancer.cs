@@ -24,6 +24,7 @@ public static class CompassEnhancer
         public bool IsQuest;
         public string DisplayName;
         public bool IconSearched;
+        public int NextNameCheck;
         public readonly System.Collections.Generic.List<CanvasGroup> Groups = new();
     }
 
@@ -125,6 +126,13 @@ public static class CompassEnhancer
 
         // Overlay: quest objectives and landmarks (not NPCs) get an icon above them in the world.
         if (!entry.IconSearched) FindIcon(entry, rect, target);
+        if (entry.IsQuest && Time.frameCount >= entry.NextNameCheck)
+        {
+            // Show the objective's own title (what the quest HUD says), not the scene object's name.
+            entry.NextNameCheck = Time.frameCount + 60;
+            string title = FindEntryTitle(rect);
+            if (!string.IsNullOrEmpty(title)) entry.DisplayName = title;
+        }
         if (entry.IsQuest && entry.Icon != null && cm.CompassEnabled)
             Overlay.Submit(target.position, entry.Icon, entry.DisplayName);
 
@@ -176,6 +184,24 @@ public static class CompassEnhancer
             }
         }
         return n;
+    }
+
+    /// <summary>The title of the quest entry whose compass element is <paramref name="rect"/>; null for landmarks and other non-quest markers.</summary>
+    private static string FindEntryTitle(RectTransform rect)
+    {
+        var quests = Il2CppScheduleOne.Quests.Quest.Quests;
+        if (quests == null) return null;
+        int id = rect.GetInstanceID();
+        foreach (var q in quests)
+        {
+            if (q == null || q.Entries == null) continue;
+            foreach (var e in q.Entries)
+            {
+                var r = e?.compassElement?.Rect;
+                if (r != null && r.GetInstanceID() == id) return e.Title;
+            }
+        }
+        return null;
     }
 
     private static void FindIcon(Entry entry, RectTransform rect, Transform target)

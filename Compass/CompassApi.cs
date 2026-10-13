@@ -69,8 +69,8 @@ public static class CompassApi
             if (h.OnCompass && h.Element == null)
             {
                 h.Element = cm.AddElement(h.Go.transform, template.GetComponent<RectTransform>(), true);
-                TintIcon(h);
             }
+            if (h.Element != null) TintIcon(h); // every frame: the element's rect may not exist yet on the frame it is added
             if (h.OnOverlay)
                 Overlay.Submit(h.Go.transform.position, template, h.Name, h.Color, LifetimeAlpha(h.Go.transform), alwaysVisible: true, key: h.Go.transform.GetInstanceID());
         }

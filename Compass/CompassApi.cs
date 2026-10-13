@@ -72,7 +72,7 @@ public static class CompassApi
                 TintIcon(h);
             }
             if (h.OnOverlay)
-                Overlay.Submit(h.Go.transform.position, template, h.Name, h.Color, LifetimeAlpha(h.Go.transform), alwaysVisible: true);
+                Overlay.Submit(h.Go.transform.position, template, h.Name, h.Color, LifetimeAlpha(h.Go.transform), alwaysVisible: true, key: h.Go.transform.GetInstanceID());
         }
     }
 

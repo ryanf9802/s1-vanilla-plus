@@ -14,7 +14,7 @@ public static class Overlay
     private const float FeetPerUnit = 3.28084f;
     private const float EyeHeight = 1.7f; // measure distance from the player's feet, not the camera
 
-    private struct Item { public Vector3 Pos; public Transform Source; public string Name; public Color? Tint; public float AlphaMul; public bool Always; }
+    private struct Item { public Vector3 Pos; public Transform Source; public string Name; public Color? Tint; public float AlphaMul; public bool Always; public int Key; }
 
     // One live clone of a vanilla icon object (circle + glyph children) per drawn item.
     private class Slot { public GameObject Go; public RectTransform Rt; public CanvasGroup Group; public Image Disc; public int SourceId; }
@@ -45,10 +45,11 @@ public static class Overlay
     public static void BeginFrame() => Items.Clear();
 
     /// <summary>Queue a copy of the vanilla icon object <paramref name="iconSource"/> above <paramref name="worldPos"/> for this frame.
+    /// <paramref name="key" /> identifies the marker for the name label when several share one icon source (pings).
     /// Distance fade and global opacity are applied by the overlay, unless <paramref name="alwaysVisible"/> (full opacity at any range).</summary>
-    public static void Submit(Vector3 worldPos, Transform iconSource, string name = null, Color? tint = null, float alphaMul = 1f, bool alwaysVisible = false)
+    public static void Submit(Vector3 worldPos, Transform iconSource, string name = null, Color? tint = null, float alphaMul = 1f, bool alwaysVisible = false, int key = 0)
     {
-        if (iconSource != null) Items.Add(new Item { Pos = worldPos, Source = iconSource, Name = name, Tint = tint, AlphaMul = alphaMul, Always = alwaysVisible });
+        if (iconSource != null) Items.Add(new Item { Pos = worldPos, Source = iconSource, Name = name, Tint = tint, AlphaMul = alphaMul, Always = alwaysVisible, Key = key != 0 ? key : iconSource.GetInstanceID() });
     }
 
     public static void Render(Canvas hudCanvas, Camera cam, Il2CppTMPro.TMP_Text styleSource)
@@ -91,7 +92,7 @@ public static class Overlay
             float tipLift = item.Always ? Settings.OverlaySize * 0.57f : 0f;
             slot.Rt.localPosition = new Vector3(local.x, local.y + tipLift, 0f);
 
-            FrameIconPos[item.Source.GetInstanceID()] = slot.Rt.localPosition;
+            FrameIconPos[item.Key] = slot.Rt.localPosition;
 
             // The icon nearest screen center (within the look radius) is the one you are looking at.
             float cd = Vector2.Distance(new Vector2(sp.x, sp.y + tipLift * _canvas.scaleFactor), screenCenter); // from where the icon is drawn
@@ -99,7 +100,7 @@ public static class Overlay
             {
                 bestCenterDist = cd;
                 lookName = item.Name;
-                lookKey = item.Source.GetInstanceID();
+                lookKey = item.Key;
             }
         }
         UpdateNameLabel(lookName, lookKey);

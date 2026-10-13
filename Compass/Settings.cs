@@ -24,8 +24,8 @@ public static class Settings
         _fadeStartFt = c.CreateEntry("FadeStartFt", 50f, description: "Markers closer than this many feet are fully opaque");
         _maxDistanceFt = c.CreateEntry("MaxDistanceFt", 500f, description: "Markers farther than this many feet are hidden; at this distance they use MinAlpha");
         _minAlpha = c.CreateEntry("MinAlpha", 0.25f, description: "Opacity of markers at MaxDistanceFt (0-1)");
-        _facingAngle = c.CreateEntry("FacingAngle", 10f, description: "Show distance only for markers within this many degrees of straight ahead");
+        _facingAngle = c.CreateEntry("FacingAngle", 6f, description: "Show distance only for markers within this many degrees of straight ahead");
         _chevronThresholdFt = c.CreateEntry("ChevronThresholdFt", 10f, description: "Show an up/down chevron when the target is at least this many feet above/below you");
-        _chevronSize = c.CreateEntry("ChevronSize", 4f, description: "Chevron size in UI pixels");
+        _chevronSize = c.CreateEntry("ChevronSize", 8f, description: "Chevron size in UI pixels");
     }
 }

@@ -71,7 +71,7 @@ public static class Settings
 
         var pl = MelonPreferences.CreateCategory("Compass_Players", "Compass - Players");
         _showPlayers = pl.CreateEntry("ShowPlayers", true, "Show players on compass", "Show your co-op partners on the compass, each in their own color.");
-        _playersOnOverlay = pl.CreateEntry("PlayersOnOverlay", true, "Show players through walls", "Show an icon above co-op partners within the overlay distance, even through walls.");
+        _playersOnOverlay = pl.CreateEntry("PlayersOnOverlay", false, "Show players through walls", "Show an icon above co-op partners within the overlay distance, even through walls.");
 
         var o = MelonPreferences.CreateCategory("Compass_Overlay", "Compass - Overlay icons");
         _overlayMaxFt = Float(o, "OverlayMaxFt", 50f, "Show within (ft)", "Overlay icons appear above quest markers and landmarks within this distance, even through walls.", 10f, 500f);

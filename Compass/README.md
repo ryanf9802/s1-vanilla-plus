@@ -7,7 +7,7 @@ A "vanilla+" upgrade to Schedule I's compass. Everything uses the game's own fon
 - **Look to reveal distance:** a marker's distance label shows at *any* range while you face it (vanilla only labels markers within ~165 ft, regardless of where you look). Only the closest marker in your view gets a label, so clusters stay readable.
 - **Elevation chevron:** a small up or down chevron after the distance tells you the target is 10 ft or more above or below you.
 - **Through-wall marker icons:** anything shown on the compass (quest objectives, landmarks, NPCs) within 50 ft gets its own icon floating above it, visible through walls. Icons ease in as you approach and fade out as you reach the marker. Look at an icon and its name appears underneath.
-- **Co-op partners on the compass:** every other player in your game gets a marker in their own color (a disc with a person silhouette), plus an icon above them through walls when they are close. Colors are the same for everyone and match that player's pings if you also run Ping. Nothing is synced: it reads the player list the game already has.
+- **Co-op partners on the compass:** every other player in your game gets a marker in their own color (a disc with a person silhouette), plus, if you turn on `PlayersOnOverlay`, an icon above them through walls when they are close. Colors are the same for everyone and match that player's pings if you also run Ping. Nothing is synced: it reads the player list the game already has.
 - **Everything is configurable**: see below.
 
 ## Installation
@@ -27,7 +27,7 @@ Settings live in `UserData/MelonPreferences.cfg` under `[Compass]`, `[Compass_Pl
 | `MinAlpha` | 0.25 | Opacity at max distance |
 | `FacingAngle` | 6 | Degrees from straight ahead that count as "facing" a marker |
 | `ChevronThresholdFt` / `ChevronSize` | 10 / 8 | When the elevation chevron shows, and its size |
-| `ShowPlayers` / `PlayersOnOverlay` | on / on | Co-op partners on the compass strip / through walls |
+| `ShowPlayers` / `PlayersOnOverlay` | on / off | Co-op partners on the compass strip / through walls |
 | `OverlayMaxFt` | 50 | Overlay icons appear within this distance |
 | `OverlayFadeInFt` | 16.4 | Icons fade in over this distance (5 m) |
 | `OverlayFadeStartFt` / `OverlayFadeEndFt` | 6 / 2 | Icons fade out between these distances |

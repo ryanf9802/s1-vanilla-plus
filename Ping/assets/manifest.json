@@ -1,6 +1,6 @@
 {
     "name": "CoopPing",
-    "version_number": "0.2.1",
+    "version_number": "0.2.2",
     "website_url": "https://github.com/ryanf9802/s1-vanilla-plus",
     "description": "Co-op ping for Schedule I: press a key to mark where you look. Partners see a color-coded marker on the compass and through walls, with a sound.",
     "dependencies": [

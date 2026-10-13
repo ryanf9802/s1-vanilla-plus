@@ -1,6 +1,6 @@
 # Ping
 
-Co-op ping for Schedule I. Press the ping key (middle mouse by default) to mark the spot you are looking at. Everyone in your co-op session sees a marker in *your* color on their compass and as an icon above the spot, visible through walls, with a short sound. Pings last 5 seconds and fade out.
+Co-op ping for Schedule I. Press the ping key (middle mouse by default) to mark the spot you are looking at. Everyone in your co-op session sees a marker in *your* color on their compass and as an icon above the spot, visible through walls, with a short sound that pans toward the ping's direction and is muffled when it is behind you. Pings last 5 seconds and fade out.
 
 Part of [s1-vanilla-plus](https://github.com/ryanf9802/s1-vanilla-plus). It builds on **Compass+**, which draws the markers, so both must be installed.
 

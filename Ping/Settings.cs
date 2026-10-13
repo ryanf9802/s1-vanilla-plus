@@ -9,7 +9,7 @@ public static class Settings
 {
     private static MelonPreferences_Entry<KeyCode> _key;
     private static MelonPreferences_Entry<float> _lifetime, _volume, _maxDistanceFt, _cooldown;
-    private static MelonPreferences_Entry<bool> _sound, _onCompass, _onOverlay;
+    private static MelonPreferences_Entry<bool> _sound, _directional, _onCompass, _onOverlay;
 
     /// <summary>Key or mouse button that sends a ping. Mouse2 is the middle mouse button.</summary>
     public static KeyCode Key => _key.Value;
@@ -18,6 +18,7 @@ public static class Settings
     public static float MaxDistanceFt => _maxDistanceFt.Value;
     public static float CooldownSeconds => _cooldown.Value;
     public static bool Sound => _sound.Value;
+    public static bool Directional => _directional.Value;
     public static bool OnCompass => _onCompass.Value;
     public static bool OnOverlay => _onOverlay.Value;
 
@@ -29,6 +30,7 @@ public static class Settings
         _maxDistanceFt = Float(c, "MaxDistanceFt", 1500f, "Max ping distance (ft)", "Farthest point you can ping.", 50f, 5000f);
         _cooldown = Float(c, "CooldownSeconds", 0.4f, "Cooldown (s)", "Minimum time between your pings.", 0.1f, 5f);
         _sound = c.CreateEntry("Sound", true, "Ping sound", "Play a sound when a ping is placed (by you or a partner).");
+        _directional = c.CreateEntry("Directional", true, "Directional sound", "Pan the ping sound toward the side the ping is on, and muffle it when it is behind you.");
         _volume = Float(c, "Volume", 0.5f, "Ping volume", "Volume of the ping sound.", 0f, 1f);
         _onCompass = c.CreateEntry("OnCompass", true, "Show on compass", "Show pings as markers on the compass strip.");
         _onOverlay = c.CreateEntry("OnOverlay", true, "Show in world", "Show pings as icons above the target, visible through walls.");

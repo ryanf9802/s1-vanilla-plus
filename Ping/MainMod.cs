@@ -180,7 +180,7 @@ public class Ping : MelonMod
     {
         int index = ColorIndex(playerId);
         CompassApi.AddMarker(pos, Palette[index], Settings.LifetimeSeconds, name, Settings.OnCompass, Settings.OnOverlay);
-        PingSound.Play(index);
+        PingSound.Play(index, pos);
     }
 
     /// <summary>Same color for the same player on every machine: rank of the Steam ID among current lobby members.</summary>

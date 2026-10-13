@@ -1,0 +1,24 @@
+﻿Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{39E9668A-A4D4-4E0A-9348-919AE5C435A5}") = "Ping", "Ping.csproj", "{4C0D1D1D-D375-40A5-B69E-DDE9CF66691B}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		IL2CPP|Any CPU = IL2CPP|Any CPU
+		Mono|Any CPU = Mono|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{4C0D1D1D-D375-40A5-B69E-DDE9CF66691B}.IL2CPP|Any CPU.ActiveCfg = IL2CPP|Any CPU
+		{4C0D1D1D-D375-40A5-B69E-DDE9CF66691B}.IL2CPP|Any CPU.Build.0 = IL2CPP|Any CPU
+		{4C0D1D1D-D375-40A5-B69E-DDE9CF66691B}.Mono|Any CPU.ActiveCfg = Mono|Any CPU
+		{4C0D1D1D-D375-40A5-B69E-DDE9CF66691B}.Mono|Any CPU.Build.0 = Mono|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {ECC7B276-CD99-4F5B-AB65-585B8AADD3EC}
+	EndGlobalSection
+EndGlobal

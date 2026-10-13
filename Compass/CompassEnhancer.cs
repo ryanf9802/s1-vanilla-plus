@@ -32,6 +32,8 @@ public static class CompassEnhancer
     private static bool _errorLogged;
     private static Il2CppTMPro.TMP_Text _styleSource; // a vanilla distance label, used to match the name label's font
     public static int Frames, Applied, Failed;
+    /// <summary>A vanilla marker icon object that other markers (pings) clone; null until a quest marker has been seen.</summary>
+    public static Transform IconTemplate { get; private set; }
 
     public static void Tick()
     {
@@ -42,6 +44,7 @@ public static class CompassEnhancer
         var camT = cam.transform;
 
         Overlay.BeginFrame();
+        try { CompassApi.Tick(cm); } catch (System.Exception e) { Failed++; if (!_errorLogged) { _errorLogged = true; MelonLoader.MelonLogger.Error($"[Compass] CompassApi failed (logged once): {e}"); } }
 
         // Pass 1: among markers you are facing, pick the one that gets a label (closest wins).
         int winner = PickLabelWinner(camT, cm);
@@ -112,9 +115,10 @@ public static class CompassEnhancer
 
         // Distance fade on our own layer: hidden past MaxDistanceFt, MinAlpha at it, opaque inside FadeStartFt.
         float distFt = dist * FeetPerUnit;
-        bool inRange = distFt <= Settings.MaxDistanceFt;
+        bool isApiMarker = CompassApi.IsMarkerTarget(target);
+        bool inRange = isApiMarker || distFt <= Settings.MaxDistanceFt;
         float fade = inRange
-            ? Mathf.Lerp(1f, Settings.MinAlpha, Mathf.InverseLerp(Settings.FadeStartFt, Settings.MaxDistanceFt, distFt))
+            ? Mathf.Lerp(1f, Settings.MinAlpha, Mathf.InverseLerp(Settings.FadeStartFt, Settings.MaxDistanceFt, distFt)) * CompassApi.LifetimeAlpha(target)
             : 0f;
         foreach (var g in entry.Groups) if (g != null) g.alpha = fade;
 
@@ -180,11 +184,12 @@ public static class CompassEnhancer
         // Quest objectives and map landmarks share the QuestElement prefab; NPCs use a different one.
         bool questPrefab = (rect.name ?? "").StartsWith("QuestElement");
         bool numbered = n.Length > 2 && n[0] == '(' && char.IsDigit(n[1]); // "(3) Go to Gas-Mart (Inactive)"
-        entry.IsQuest = questPrefab && (!Settings.OverlayQuestsOnly || numbered);
+        entry.IsQuest = questPrefab && !CompassApi.IsMarkerTarget(target) && (!Settings.OverlayQuestsOnly || numbered);
         if (!entry.IsQuest) return;
         entry.DisplayName = CleanName(n);
         var iconT = rect.Find("QuestIcon(Clone)");
         entry.Icon = iconT;
+        if (iconT != null && IconTemplate == null) IconTemplate = iconT;
         MelonLoader.MelonLogger.Msg($"[Compass] quest marker '{n}' icon={(entry.Icon != null ? entry.Icon.name + " children=" + entry.Icon.childCount : "none")}");
     }
 

@@ -14,10 +14,10 @@ public static class Overlay
     private const float FeetPerUnit = 3.28084f;
     private const float EyeHeight = 1.7f; // measure distance from the player's feet, not the camera
 
-    private struct Item { public Vector3 Pos; public Transform Source; public string Name; }
+    private struct Item { public Vector3 Pos; public Transform Source; public string Name; public Color? Tint; public float AlphaMul; }
 
     // One live clone of a vanilla icon object (circle + glyph children) per drawn item.
-    private class Slot { public GameObject Go; public RectTransform Rt; public CanvasGroup Group; public int SourceId; }
+    private class Slot { public GameObject Go; public RectTransform Rt; public CanvasGroup Group; public Image Root; public int SourceId; }
 
     private static readonly System.Collections.Generic.List<Item> Items = new();
     private static readonly System.Collections.Generic.List<Slot> Pool = new();
@@ -46,9 +46,9 @@ public static class Overlay
 
     /// <summary>Queue a copy of the vanilla icon object <paramref name="iconSource"/> above <paramref name="worldPos"/> for this frame.
     /// Distance fade and global opacity are applied by the overlay.</summary>
-    public static void Submit(Vector3 worldPos, Transform iconSource, string name = null)
+    public static void Submit(Vector3 worldPos, Transform iconSource, string name = null, Color? tint = null, float alphaMul = 1f)
     {
-        if (iconSource != null) Items.Add(new Item { Pos = worldPos, Source = iconSource, Name = name });
+        if (iconSource != null) Items.Add(new Item { Pos = worldPos, Source = iconSource, Name = name, Tint = tint, AlphaMul = alphaMul });
     }
 
     public static void Render(Canvas hudCanvas, Camera cam, Il2CppTMPro.TMP_Text styleSource)
@@ -75,7 +75,8 @@ public static class Overlay
             if (!RectTransformUtility.ScreenPointToLocalPointInRectangle(_root, new Vector2(sp.x, sp.y), uiCam, out Vector2 local)) continue;
 
             var slot = GetSlot(used++, item.Source);
-            slot.Group.alpha = alpha * Settings.OverlayOpacity;
+            slot.Group.alpha = alpha * Settings.OverlayOpacity * item.AlphaMul;
+            if (item.Tint.HasValue && slot.Root != null) slot.Root.color = item.Tint.Value;
             slot.Rt.sizeDelta = new Vector2(Settings.OverlaySize, Settings.OverlaySize);
             slot.Rt.localPosition = new Vector3(local.x, local.y, 0f);
 
@@ -154,6 +155,7 @@ public static class Overlay
             slot.Rt = slot.Go.GetComponent<RectTransform>();
             slot.Rt.anchorMin = slot.Rt.anchorMax = slot.Rt.pivot = new Vector2(0.5f, 0.5f);
             slot.Rt.localScale = Vector3.one;
+            slot.Root = slot.Go.GetComponent<Image>();
             slot.Group = slot.Go.GetComponent<CanvasGroup>();
             if (slot.Group == null) slot.Group = slot.Go.AddComponent<CanvasGroup>();
             slot.Group.interactable = false;

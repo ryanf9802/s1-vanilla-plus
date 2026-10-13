@@ -52,6 +52,12 @@ def main() -> int:
             for info in z.infolist():
                 if info.filename.endswith(".dll"):
                     bundle_files[f"Mods/{Path(info.filename).name}"] = z.read(info)
+        # Files a mod needs outside its own DLL (e.g. a networking library for UserLibs): assets/bundle-extra.json maps
+        # a path inside the game folder to a file relative to the mod folder. Single-mod zips list these as dependencies instead.
+        extra = mod / "assets" / "bundle-extra.json"
+        if extra.exists():
+            for arc, rel in json.loads(extra.read_text(encoding="utf-8")).items():
+                bundle_files[arc] = (mod / rel).read_bytes()
 
     version = args.version or ".".join(map(str, max(versions)))
     bundle = dist / f"S1VanillaPlus-{version}.zip"

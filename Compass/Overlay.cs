@@ -94,7 +94,7 @@ public static class Overlay
             FrameIconPos[item.Source.GetInstanceID()] = slot.Rt.localPosition;
 
             // The icon nearest screen center (within the look radius) is the one you are looking at.
-            float cd = Vector2.Distance(new Vector2(sp.x, sp.y), screenCenter);
+            float cd = Vector2.Distance(new Vector2(sp.x, sp.y + tipLift * _canvas.scaleFactor), screenCenter); // from where the icon is drawn
             if (item.Name != null && alpha > 0.05f && cd < bestCenterDist)
             {
                 bestCenterDist = cd;

@@ -14,7 +14,7 @@ public static class Settings
     private static MelonPreferences_Entry<float> _maxDistanceFt, _fadeStartFt, _minAlpha, _facingAngle, _chevronThresholdFt, _chevronSize;
     private static MelonPreferences_Entry<float> _overlayMaxFt, _overlayFadeInFt, _overlayFadeStartFt, _overlayFadeEndFt, _overlayHeightFt,
         _overlaySize, _overlayOpacity, _overlayLookRadius, _overlayNameOpacity, _overlayNameScale;
-    private static MelonPreferences_Entry<bool> _overlayQuestsOnly, _overlayShowNames, _debugLogging;
+    private static MelonPreferences_Entry<bool> _overlayQuestsOnly, _overlayShowNames, _debugLogging, _showPlayers, _playersOnOverlay;
 
     // --- Compass strip -------------------------------------------------------------------------------------------
     /// <summary>Markers farther than this many feet are hidden; markers right at it use MinAlpha.</summary>
@@ -27,6 +27,10 @@ public static class Settings
     /// <summary>Show the up/down chevron when the target is at least this many feet above/below you.</summary>
     public static float ChevronThresholdFt => _chevronThresholdFt.Value;
     public static float ChevronSize => _chevronSize.Value;
+    /// <summary>Show co-op partners on the compass strip.</summary>
+    public static bool ShowPlayers => _showPlayers.Value;
+    /// <summary>Show a through-wall icon above co-op partners (within the overlay distance).</summary>
+    public static bool PlayersOnOverlay => _playersOnOverlay.Value;
     public static bool DebugLogging => _debugLogging.Value;
 
     // --- Overlay icons (distances in feet) -----------------------------------------------------------------------
@@ -64,6 +68,10 @@ public static class Settings
         _chevronThresholdFt = Float(c, "ChevronThresholdFt", 10f, "Elevation chevron threshold (ft)", "Show an up/down chevron after the distance when the target is at least this many feet above or below you.", 1f, 200f);
         _chevronSize = Float(c, "ChevronSize", 8f, "Chevron size", "Size of the elevation chevron in UI pixels.", 2f, 40f);
         _debugLogging = c.CreateEntry("DebugLogging", false, "Debug logging", "Log compass state to the MelonLoader log every few seconds. Leave off unless troubleshooting.");
+
+        var pl = MelonPreferences.CreateCategory("Compass_Players", "Compass - Players");
+        _showPlayers = pl.CreateEntry("ShowPlayers", true, "Show players on compass", "Show your co-op partners on the compass, each in their own color.");
+        _playersOnOverlay = pl.CreateEntry("PlayersOnOverlay", true, "Show players through walls", "Show an icon above co-op partners within the overlay distance, even through walls.");
 
         var o = MelonPreferences.CreateCategory("Compass_Overlay", "Compass - Overlay icons");
         _overlayMaxFt = Float(o, "OverlayMaxFt", 50f, "Show within (ft)", "Overlay icons appear above quest markers and landmarks within this distance, even through walls.", 10f, 500f);

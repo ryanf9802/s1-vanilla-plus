@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+- Other players (co-op partners) show on the compass and as through-wall icons, each in their own color (`ShowPlayers`, `PlayersOnOverlay`).
+- New API: `CompassApi.AddTrackedMarker` follows a transform; markers can use the `Person` icon. `PlayerColors` gives a per-player color shared with Ping.
+
 ## 0.2.0
 - Overlay icons now cover everything on the compass (quest objectives, landmarks, NPCs, other markers), not just quest-prefab markers.
 - Overlay labels for quest objectives show the objective's own title.

@@ -45,6 +45,7 @@ public static class CompassEnhancer
         var camT = cam.transform;
 
         Overlay.BeginFrame();
+        try { PlayerMarkers.Tick(); } catch (System.Exception e) { Failed++; if (!_errorLogged) { _errorLogged = true; MelonLoader.MelonLogger.Error($"[Compass] PlayerMarkers failed (logged once): {e}"); } }
         try { CompassApi.Tick(cm); } catch (System.Exception e) { Failed++; if (!_errorLogged) { _errorLogged = true; MelonLoader.MelonLogger.Error($"[Compass] CompassApi failed (logged once): {e}"); } }
 
         // Pass 1: among markers you are facing, pick the one that gets a label (closest wins).
@@ -118,7 +119,8 @@ public static class CompassEnhancer
         float distFt = dist * FeetPerUnit;
         bool isApiMarker = CompassApi.IsMarkerTarget(target);
         bool inRange = isApiMarker || distFt <= Settings.MaxDistanceFt;
-        float fade = isApiMarker ? CompassApi.LifetimeAlpha(target) // pings: full opacity at any range until they expire
+        bool distanceFade = !isApiMarker || CompassApi.FadesWithDistance(target); // tracked markers (players) fade like built-in ones but never disappear
+        float fade = !distanceFade ? CompassApi.LifetimeAlpha(target) // pings: full opacity at any range until they expire
             : inRange
             ? Mathf.Lerp(1f, Settings.MinAlpha, Mathf.InverseLerp(Settings.FadeStartFt, Settings.MaxDistanceFt, distFt)) 
             : 0f;

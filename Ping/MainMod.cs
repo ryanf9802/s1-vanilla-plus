@@ -29,11 +29,7 @@ public static class BuildInfo
 /// </summary>
 public class Ping : MelonMod
 {
-    private static readonly Color[] Palette =
-    {
-        new(0.33f, 0.67f, 1.00f), new(1.00f, 0.35f, 0.35f), new(0.43f, 0.86f, 0.47f), new(0.75f, 0.47f, 1.00f),
-        new(1.00f, 0.63f, 0.24f), new(0.31f, 0.90f, 0.90f), new(1.00f, 0.51f, 0.78f), new(0.92f, 0.92f, 0.92f),
-    };
+    private static Color[] Palette => Compass.PlayerColors.Palette;
 
     private SteamNetworkClient _client;
     private bool _networkReady;
@@ -178,7 +174,11 @@ public class Ping : MelonMod
 
     private void ShowPing(Vector3 pos, ulong playerId, string name)
     {
-        int index = ColorIndex(playerId);
+        // Same color as that player's compass marker: ranked by in-game name; fall back to Steam ID rank if the name is unknown.
+        string colorName = playerId == (_networkReady ? _client.LocalPlayerId64 : 0UL) || name == "You"
+            ? Il2CppScheduleOne.PlayerScripts.Player.Local?.PlayerName : name;
+        int index = Compass.PlayerColors.IndexFor(colorName);
+        if (index < 0) index = ColorIndex(playerId);
         CompassApi.AddMarker(pos, Palette[index], Settings.LifetimeSeconds, name, Settings.OnCompass, Settings.OnOverlay);
         PingSound.Play(index, pos);
     }

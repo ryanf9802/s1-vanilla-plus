@@ -14,7 +14,7 @@ public static class Overlay
     private const float FeetPerUnit = 3.28084f;
     private const float EyeHeight = 1.7f; // measure distance from the player's feet, not the camera
 
-    private struct Item { public Vector3 Pos; public Transform Source; public string Name; public Color? Tint; public float AlphaMul; public bool Always; public int Key; }
+    private struct Item { public Vector3 Pos; public Transform Source; public string Name; public Color? Tint; public float AlphaMul; public bool Always; public int Key; public float? LiftFt; }
 
     // One live clone of a vanilla icon object (circle + glyph children) per drawn item.
     private class Slot { public GameObject Go; public RectTransform Rt; public CanvasGroup Group; public Image Disc; public int SourceId; }
@@ -47,9 +47,9 @@ public static class Overlay
     /// <summary>Queue a copy of the vanilla icon object <paramref name="iconSource"/> above <paramref name="worldPos"/> for this frame.
     /// <paramref name="key" /> identifies the marker for the name label when several share one icon source (pings).
     /// Distance fade and global opacity are applied by the overlay, unless <paramref name="alwaysVisible"/> (full opacity at any range).</summary>
-    public static void Submit(Vector3 worldPos, Transform iconSource, string name = null, Color? tint = null, float alphaMul = 1f, bool alwaysVisible = false, int key = 0)
+    public static void Submit(Vector3 worldPos, Transform iconSource, string name = null, Color? tint = null, float alphaMul = 1f, bool alwaysVisible = false, int key = 0, float? liftFt = null)
     {
-        if (iconSource != null) Items.Add(new Item { Pos = worldPos, Source = iconSource, Name = name, Tint = tint, AlphaMul = alphaMul, Always = alwaysVisible, Key = key != 0 ? key : iconSource.GetInstanceID() });
+        if (iconSource != null) Items.Add(new Item { Pos = worldPos, Source = iconSource, Name = name, Tint = tint, AlphaMul = alphaMul, Always = alwaysVisible, Key = key != 0 ? key : iconSource.GetInstanceID(), LiftFt = liftFt });
     }
 
     public static void Render(Canvas hudCanvas, Camera cam, Il2CppTMPro.TMP_Text styleSource)
@@ -80,7 +80,7 @@ public static class Overlay
         {
             float alpha = item.Always ? 1f : AlphaForDistanceFt(Vector3.Distance(feet, item.Pos) * FeetPerUnit);
             if (alpha <= 0.01f) continue;
-            Vector3 sp = cam.WorldToScreenPoint(item.Always ? item.Pos : item.Pos + lift);
+            Vector3 sp = cam.WorldToScreenPoint(item.Always ? item.Pos : item.Pos + (item.LiftFt.HasValue ? new Vector3(0f, item.LiftFt.Value / FeetPerUnit, 0f) : lift));
             if (sp.z <= 0f || sp.x < 0f || sp.y < 0f || sp.x > Screen.width || sp.y > Screen.height) continue;
             if (!RectTransformUtility.ScreenPointToLocalPointInRectangle(_root, new Vector2(sp.x, sp.y), uiCam, out Vector2 local)) continue;
 

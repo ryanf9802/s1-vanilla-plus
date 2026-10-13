@@ -17,7 +17,7 @@ public static class Overlay
     private struct Item { public Vector3 Pos; public Transform Source; public string Name; public Color? Tint; public float AlphaMul; public bool Always; public int Key; public float? LiftFt; }
 
     // One live clone of a vanilla icon object (circle + glyph children) per drawn item.
-    private class Slot { public GameObject Go; public RectTransform Rt; public CanvasGroup Group; public Image Disc; public int SourceId; }
+    private class Slot { public GameObject Go; public RectTransform Rt; public CanvasGroup Group; public Image Disc; public int SourceId; public int Stamp; }
 
     private static readonly System.Collections.Generic.List<Item> Items = new();
     private static readonly System.Collections.Generic.List<Slot> Pool = new();
@@ -54,7 +54,9 @@ public static class Overlay
         _nameRect = null;
     }
 
-    public static void BeginFrame() => Items.Clear();
+    private static int _frame;
+
+    public static void BeginFrame() { Items.Clear(); _frame++; }
 
     /// <summary>Queue a copy of the vanilla icon object <paramref name="iconSource"/> above <paramref name="worldPos"/> for this frame.
     /// <paramref name="key" /> identifies the marker for the name label when several share one icon source (pings).
@@ -66,7 +68,7 @@ public static class Overlay
 
     public static void Render(Canvas hudCanvas, Camera cam, Il2CppTMPro.TMP_Text styleSource)
     {
-        if (hudCanvas == null || cam == null) { Hide(0); return; }
+        if (hudCanvas == null || cam == null) { HideUnused(); return; }
         EnsureRoot(hudCanvas);
         EnsureNameLabel(styleSource);
         if (PhoneOpen())
@@ -74,7 +76,7 @@ public static class Overlay
             // The overlay canvas draws above the phone UI, so step aside while the phone is up.
             FrameIconPos.Clear();
             UpdateNameLabel(null, 0);
-            Hide(0);
+            HideUnused();
             LastDrawn = 0;
             return;
         }
@@ -96,7 +98,8 @@ public static class Overlay
             if (sp.z <= 0f || sp.x < 0f || sp.y < 0f || sp.x > Screen.width || sp.y > Screen.height) continue;
             if (!RectTransformUtility.ScreenPointToLocalPointInRectangle(_root, new Vector2(sp.x, sp.y), uiCam, out Vector2 local)) continue;
 
-            var slot = GetSlot(used++, item.Source);
+            var slot = GetSlot(item.Source);
+            used++;
             slot.Group.alpha = (item.Always ? 1f : alpha * Settings.OverlayOpacity) * item.AlphaMul;
             if (item.Tint.HasValue && slot.Disc != null) slot.Disc.color = item.Tint.Value;
             slot.Rt.sizeDelta = new Vector2(Settings.OverlaySize, Settings.OverlaySize);
@@ -116,7 +119,7 @@ public static class Overlay
             }
         }
         UpdateNameLabel(lookName, lookKey);
-        Hide(used);
+        HideUnused();
         LastDrawn = used;
     }
 
@@ -169,17 +172,25 @@ public static class Overlay
         _nameLabel.text = "";
     }
 
-    private static void Hide(int from)
+    /// <summary>Hide every pooled icon that was not drawn this frame.</summary>
+    private static void HideUnused()
     {
-        for (int i = from; i < Pool.Count; i++)
-            if (Pool[i].Go != null && Pool[i].Go.activeSelf) Pool[i].Go.SetActive(false);
+        foreach (var slot in Pool)
+            if (slot.Stamp != _frame && slot.Go != null && slot.Go.activeSelf) slot.Go.SetActive(false);
     }
 
-    private static Slot GetSlot(int i, Transform source)
+    /// <summary>A pooled icon for <paramref name="source"/>: one already built from it if free, else any free one rebuilt, else a new one.</summary>
+    private static Slot GetSlot(Transform source)
     {
-        while (Pool.Count <= i) Pool.Add(new Slot());
-        var slot = Pool[i];
         int id = source.GetInstanceID();
+        Slot slot = null;
+        foreach (var s in Pool)
+            if (s.Stamp != _frame && s.Go != null && s.SourceId == id) { slot = s; break; }
+        if (slot == null)
+            foreach (var s in Pool)
+                if (s.Stamp != _frame) { slot = s; break; }
+        if (slot == null) { slot = new Slot(); Pool.Add(slot); }
+        slot.Stamp = _frame;
         if (slot.Go == null || slot.SourceId != id)
         {
             if (slot.Go != null) UnityEngine.Object.Destroy(slot.Go);

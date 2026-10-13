@@ -29,8 +29,10 @@ internal static class DealerMarkers
             }
             string name = d.FullName ?? "Dealer";
             MelonLoader.MelonLogger.Msg($"[Compass] tracking dealer '{name}'");
+            Sprite mugshot = null;
+            try { mugshot = d.MugshotSprite; } catch { /* no portrait: the sack icon is used */ }
             Tracked[id] = CompassApi.AddTrackedMarker(d.transform, DealerColor, name, MarkerIcon.Dealer,
-                compass, overlay, new Vector3(0f, 1.2f, 0f), overlayLiftFt: 1.2f);
+                compass, overlay, new Vector3(0f, 1.2f, 0f), overlayLiftFt: 1.2f, portrait: mugshot);
         }
 
         var gone = new System.Collections.Generic.List<int>();

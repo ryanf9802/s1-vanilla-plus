@@ -1,7 +1,7 @@
 # Changelog
 
 ## Unreleased
-- Recruited dealers show on the compass with a green sack icon (`ShowDealers`), with an optional through-wall icon (`DealersOnOverlay`, off by default).
+- Recruited dealers show on the compass with their phone-map portrait in a green round frame (`ShowDealers`; a green sack icon if the game has no portrait), with an optional through-wall icon (`DealersOnOverlay`, off by default).
 
 ## 0.2.5
 - Fix: pings and player markers did not show in worlds whose compass had no `QuestIcon(Clone)` icon (it can be `QuestIcon_Blue(Clone)` or absent). Their icons are now built from scratch and no longer copy a vanilla icon.

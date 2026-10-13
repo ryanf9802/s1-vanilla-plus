@@ -25,6 +25,8 @@ public sealed class MarkerHandle
     internal bool OnCompass, OnOverlay;
     internal CompassManager.Element Element;
     internal Image Pin;
+    internal Sprite Portrait;        // optional picture shown inside a round frame instead of a glyph
+    internal Transform CustomTemplate; // per-marker icon built for a Portrait
     internal MarkerIcon Icon;
     internal Transform Follow;      // when set, the marker tracks this transform (plus FollowOffset) and never expires on its own
     internal Vector3 FollowOffset;
@@ -76,7 +78,7 @@ public static class CompassApi
     /// built-in markers and is never hidden by range on the compass.
     /// </summary>
     public static MarkerHandle AddTrackedMarker(Transform target, Color color, string name, MarkerIcon icon = MarkerIcon.Person,
-        bool onCompass = true, bool onOverlay = true, Vector3 offset = default, float overlayLiftFt = 1f)
+        bool onCompass = true, bool onOverlay = true, Vector3 offset = default, float overlayLiftFt = 1f, Sprite portrait = null)
     {
         var go = new GameObject("CompassTracked:" + name);
         go.transform.position = target.position + offset;
@@ -84,7 +86,7 @@ public static class CompassApi
         {
             Go = go, Color = color, Name = name, OnCompass = onCompass, OnOverlay = onOverlay,
             Expire = float.PositiveInfinity, FadeOut = 1f, Icon = icon,
-            Follow = target, FollowOffset = offset, FadesWithDistance = true, LiftFt = overlayLiftFt,
+            Follow = target, FollowOffset = offset, FadesWithDistance = true, LiftFt = overlayLiftFt, Portrait = portrait,
         };
         Markers.Add(h);
         ByTarget[go.transform.GetInstanceID()] = h;
@@ -110,7 +112,13 @@ public static class CompassApi
             if (h.Go == null || Time.time >= h.Expire || (h.Follow == null && h.FadesWithDistance)) { Destroy(cm, h); Markers.RemoveAt(i); continue; }
             if (h.Follow != null) h.Go.transform.position = h.Follow.position + h.FollowOffset;
 
-            var template = GetTemplate(h.Icon);
+            Transform template;
+            if (h.Portrait != null)
+            {
+                if (h.CustomTemplate == null) h.CustomTemplate = BuildTemplate(h.Icon, h.Portrait);
+                template = h.CustomTemplate;
+            }
+            else template = GetTemplate(h.Icon);
             if (template == null) continue;
 
             if (h.OnCompass && h.Element == null)
@@ -151,7 +159,7 @@ public static class CompassApi
     {
         if (!_templates.TryGetValue(icon, out var t) || t == null)
         {
-            t = BuildTemplate(icon);
+            t = BuildTemplate(icon, null);
             _templates[icon] = t;
         }
         return t;
@@ -161,7 +169,7 @@ public static class CompassApi
     /// The icon API markers use, built from scratch (no dependence on any vanilla icon existing in the world): an empty icon
     /// object of the compass's element size holding our own colored shape and a white glyph. The shape is tinted per marker.
     /// </summary>
-    private static Transform BuildTemplate(MarkerIcon icon)
+    private static Transform BuildTemplate(MarkerIcon icon, Sprite portrait)
     {
         Vector2 size = new(40f, 40f);
         try
@@ -196,6 +204,30 @@ public static class CompassApi
         shapeImg.sprite = person ? GetDiscSprite() : GetPinSprite();
         shapeImg.preserveAspect = true;
         shapeImg.raycastTarget = false;
+
+        if (portrait != null)
+        {
+            // Profile-picture style: the picture clipped to a circle inside the colored ring.
+            var maskGo = new GameObject("PortraitMask");
+            var mr = maskGo.AddComponent<RectTransform>();
+            mr.SetParent(sr, false);
+            mr.anchorMin = new Vector2(0.09f, 0.09f); mr.anchorMax = new Vector2(0.91f, 0.91f);
+            mr.offsetMin = mr.offsetMax = Vector2.zero;
+            var maskImg = maskGo.AddComponent<Image>();
+            maskImg.sprite = GetDiscSprite();
+            maskImg.raycastTarget = false;
+            var mask = maskGo.AddComponent<Mask>();
+            mask.showMaskGraphic = false;
+            var picGo = new GameObject("Portrait");
+            var pr = picGo.AddComponent<RectTransform>();
+            pr.SetParent(mr, false);
+            pr.anchorMin = Vector2.zero; pr.anchorMax = Vector2.one;
+            pr.offsetMin = pr.offsetMax = Vector2.zero;
+            var pic = picGo.AddComponent<Image>();
+            pic.sprite = portrait;
+            pic.raycastTarget = false;
+            return go.transform;
+        }
 
         var glyph = new GameObject(person ? icon + "Glyph" : "PingDot");
         var gr = glyph.AddComponent<RectTransform>();

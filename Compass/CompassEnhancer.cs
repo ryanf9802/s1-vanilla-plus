@@ -22,6 +22,7 @@ public static class CompassEnhancer
         public RectTransform ChevronRect;
         public Transform Icon;      // the vanilla marker icon object (circle + glyph), cloned for the overlay
         public bool IsQuest;
+        public string DisplayName;
         public bool IconSearched;
         public readonly System.Collections.Generic.List<CanvasGroup> Groups = new();
     }
@@ -29,6 +30,7 @@ public static class CompassEnhancer
     private static readonly System.Collections.Generic.Dictionary<int, Entry> Entries = new();
     private static Sprite _chevronSprite;
     private static bool _errorLogged;
+    private static Il2CppTMPro.TMP_Text _styleSource; // a vanilla distance label, used to match the name label's font
     public static int Frames, Applied, Failed;
 
     public static void Tick()
@@ -56,7 +58,7 @@ public static class CompassEnhancer
             }
         }
 
-        try { Overlay.Render(cm.Canvas, cam); }
+        try { Overlay.Render(cm.Canvas, cam, _styleSource); }
         catch (System.Exception e)
         {
             Failed++;
@@ -119,10 +121,11 @@ public static class CompassEnhancer
         // Overlay: quest objectives and landmarks (not NPCs) get an icon above them in the world.
         if (!entry.IconSearched) FindIcon(entry, rect, target);
         if (entry.IsQuest && entry.Icon != null && cm.CompassEnabled)
-            Overlay.Submit(target.position, entry.Icon);
+            Overlay.Submit(target.position, entry.Icon, entry.DisplayName);
 
         // Label: only on the closest marker you are facing (horizontal angle, so looking up/down still counts).
         var label = el.DistanceLabel;
+        if (label != null && _styleSource == null) _styleSource = label;
         if (label != null)
         {
             bool facing = rect.GetInstanceID() == labelWinner;
@@ -154,6 +157,22 @@ public static class CompassEnhancer
         }
     }
 
+    /// <summary>"(3) Go to Gas-Mart (Inactive)" becomes "Go to Gas-Mart"; plain landmark names pass through.</summary>
+    private static string CleanName(string n)
+    {
+        if (n.Length > 2 && n[0] == '(' && char.IsDigit(n[1]))
+        {
+            int close = n.IndexOf(')');
+            if (close > 0) n = n.Substring(close + 1).Trim();
+            if (n.EndsWith(")"))
+            {
+                int open = n.LastIndexOf(" (", System.StringComparison.Ordinal);
+                if (open > 0) n = n.Substring(0, open);
+            }
+        }
+        return n;
+    }
+
     private static void FindIcon(Entry entry, RectTransform rect, Transform target)
     {
         entry.IconSearched = true;
@@ -163,6 +182,7 @@ public static class CompassEnhancer
         bool numbered = n.Length > 2 && n[0] == '(' && char.IsDigit(n[1]); // "(3) Go to Gas-Mart (Inactive)"
         entry.IsQuest = questPrefab && (!Settings.OverlayQuestsOnly || numbered);
         if (!entry.IsQuest) return;
+        entry.DisplayName = CleanName(n);
         var iconT = rect.Find("QuestIcon(Clone)");
         entry.Icon = iconT;
         MelonLoader.MelonLogger.Msg($"[Compass] quest marker '{n}' icon={(entry.Icon != null ? entry.Icon.name + " children=" + entry.Icon.childCount : "none")}");

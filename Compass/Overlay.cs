@@ -14,7 +14,7 @@ public static class Overlay
     private const float FeetPerUnit = 3.28084f;
     private const float EyeHeight = 1.7f; // measure distance from the player's feet, not the camera
 
-    private struct Item { public Vector3 Pos; public Transform Source; }
+    private struct Item { public Vector3 Pos; public Transform Source; public string Name; }
 
     // One live clone of a vanilla icon object (circle + glyph children) per drawn item.
     private class Slot { public GameObject Go; public RectTransform Rt; public CanvasGroup Group; public int SourceId; }
@@ -23,6 +23,8 @@ public static class Overlay
     private static readonly System.Collections.Generic.List<Slot> Pool = new();
     private static RectTransform _root;
     private static Canvas _canvas;
+    private static Il2CppTMPro.TextMeshProUGUI _nameLabel;
+    private static RectTransform _nameRect;
 
     public static int LastDrawn;
 
@@ -41,20 +43,25 @@ public static class Overlay
 
     /// <summary>Queue a copy of the vanilla icon object <paramref name="iconSource"/> above <paramref name="worldPos"/> for this frame.
     /// Distance fade and global opacity are applied by the overlay.</summary>
-    public static void Submit(Vector3 worldPos, Transform iconSource)
+    public static void Submit(Vector3 worldPos, Transform iconSource, string name = null)
     {
-        if (iconSource != null) Items.Add(new Item { Pos = worldPos, Source = iconSource });
+        if (iconSource != null) Items.Add(new Item { Pos = worldPos, Source = iconSource, Name = name });
     }
 
-    public static void Render(Canvas hudCanvas, Camera cam)
+    public static void Render(Canvas hudCanvas, Camera cam, Il2CppTMPro.TMP_Text styleSource)
     {
         if (hudCanvas == null || cam == null) { Hide(0); return; }
         EnsureRoot(hudCanvas);
+        EnsureNameLabel(styleSource);
         Vector3 feet = cam.transform.position - new Vector3(0f, EyeHeight, 0f);
         Vector3 lift = new(0f, Settings.OverlayHeightFt / FeetPerUnit, 0f);
         Camera uiCam = _canvas.renderMode == RenderMode.ScreenSpaceOverlay ? null : _canvas.worldCamera;
 
         int used = 0;
+        string lookName = null;
+        Vector3 lookPos = Vector3.zero;
+        float lookAlpha = 0f, bestCenterDist = Settings.OverlayLookRadius * Screen.height;
+        var screenCenter = new Vector2(Screen.width * 0.5f, Screen.height * 0.5f);
         foreach (var item in Items)
         {
             float alpha = AlphaForDistanceFt(Vector3.Distance(feet, item.Pos) * FeetPerUnit);
@@ -67,9 +74,52 @@ public static class Overlay
             slot.Group.alpha = alpha * Settings.OverlayOpacity;
             slot.Rt.sizeDelta = new Vector2(Settings.OverlaySize, Settings.OverlaySize);
             slot.Rt.localPosition = new Vector3(local.x, local.y, 0f);
+
+            // The icon nearest screen center (within the look radius) is the one you are looking at.
+            float cd = Vector2.Distance(new Vector2(sp.x, sp.y), screenCenter);
+            if (item.Name != null && alpha > 0.05f && cd < bestCenterDist)
+            {
+                bestCenterDist = cd;
+                lookName = item.Name;
+                lookPos = slot.Rt.localPosition;
+                lookAlpha = alpha * Settings.OverlayOpacity;
+            }
         }
+        UpdateNameLabel(lookName, lookPos, lookAlpha);
         Hide(used);
         LastDrawn = used;
+    }
+
+    private static void UpdateNameLabel(string name, Vector3 iconPos, float iconAlpha)
+    {
+        if (_nameLabel == null) return;
+        bool looking = name != null && Settings.OverlayShowNames;
+        if (looking)
+        {
+            if (_nameLabel.text != name) _nameLabel.text = name;
+            _nameRect.localPosition = iconPos + new Vector3(0f, -(Settings.OverlaySize * 0.5f + _nameLabel.fontSize * 0.7f), 0f);
+        }
+        float goal = looking ? Mathf.Clamp01(iconAlpha / Mathf.Max(0.01f, Settings.OverlayOpacity)) * Settings.OverlayNameOpacity : 0f;
+        _nameLabel.alpha = Mathf.MoveTowards(_nameLabel.alpha, goal, Time.deltaTime * 6f);
+    }
+
+    private static void EnsureNameLabel(Il2CppTMPro.TMP_Text src)
+    {
+        if (_nameLabel != null || src == null || _root == null) return;
+        var go = new GameObject("OverlayName");
+        go.transform.SetParent(_root, false);
+        _nameRect = go.AddComponent<RectTransform>();
+        _nameRect.anchorMin = _nameRect.anchorMax = _nameRect.pivot = new Vector2(0.5f, 0.5f);
+        _nameRect.sizeDelta = new Vector2(500f, 40f);
+        _nameLabel = go.AddComponent<Il2CppTMPro.TextMeshProUGUI>();
+        _nameLabel.font = src.font;
+        _nameLabel.fontSharedMaterial = src.fontSharedMaterial;
+        _nameLabel.fontSize = src.fontSize;
+        _nameLabel.color = src.color;
+        _nameLabel.alignment = Il2CppTMPro.TextAlignmentOptions.Center;
+        _nameLabel.raycastTarget = false;
+        _nameLabel.alpha = 0f;
+        _nameLabel.text = "";
     }
 
     private static void Hide(int from)
@@ -107,6 +157,7 @@ public static class Overlay
         if (_root != null && _canvas == hudCanvas) return;
         _canvas = hudCanvas;
         Pool.Clear();
+        _nameLabel = null;
         var go = new GameObject("CompassOverlay");
         go.transform.SetParent(hudCanvas.transform, false);
         _root = go.AddComponent<RectTransform>();

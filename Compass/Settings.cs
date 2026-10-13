@@ -5,9 +5,9 @@ namespace Compass;
 /// <summary>User-tweakable options, stored in UserData/MelonPreferences.cfg under [Compass].</summary>
 public static class Settings
 {
-    private static MelonPreferences_Entry<bool> _overlayQuestsOnly;
+    private static MelonPreferences_Entry<bool> _overlayQuestsOnly, _overlayShowNames;
     private static MelonPreferences_Entry<float> _fadeStartFt, _maxDistanceFt, _minAlpha, _facingAngle, _chevronThresholdFt, _chevronSize,
-        _overlayMaxFt, _overlayFadeStartFt, _overlayFadeEndFt, _overlayHeightFt, _overlaySize, _overlayOpacity, _overlayFadeInFt;
+        _overlayMaxFt, _overlayFadeStartFt, _overlayFadeEndFt, _overlayHeightFt, _overlaySize, _overlayOpacity, _overlayFadeInFt, _overlayLookRadius, _overlayNameOpacity;
 
     /// <summary>Markers closer than this many feet are fully opaque.</summary>
     public static float FadeStartFt => _fadeStartFt.Value;
@@ -30,6 +30,12 @@ public static class Settings
     /// <summary>How far above the target the icon floats.</summary>
     public static float OverlayHeightFt => _overlayHeightFt.Value;
     public static float OverlaySize => _overlaySize.Value;
+    /// <summary>Show the marker's name under an overlay icon while you look at it.</summary>
+    public static bool OverlayShowNames => _overlayShowNames.Value;
+    /// <summary>How close to screen center an icon must be to count as "looked at", as a fraction of screen height.</summary>
+    public static float OverlayLookRadius => _overlayLookRadius.Value;
+    /// <summary>Opacity of the name label at full strength (0-1).</summary>
+    public static float OverlayNameOpacity => _overlayNameOpacity.Value;
     /// <summary>Icons fade in from 0 to full over this many feet after entering OverlayMaxFt (so they don't pop in).</summary>
     public static float OverlayFadeInFt => _overlayFadeInFt.Value;
     /// <summary>Overall opacity of overlay icons (0-1), multiplied with the distance fade.</summary>
@@ -52,6 +58,9 @@ public static class Settings
         _overlayQuestsOnly = c.CreateEntry("OverlayQuestsOnly", false, description: "true: only numbered quest objectives get overlay icons; false: map landmarks too (NPCs never do)");
         _overlayOpacity = c.CreateEntry("OverlayOpacity", 0.6f, description: "Overall opacity of overlay icons (0-1)");
         _overlayFadeInFt = c.CreateEntry("OverlayFadeInFt", 16.4f, description: "Overlay icons fade in over this many feet after entering OverlayMaxFt (16.4ft = 5m)");
+        _overlayShowNames = c.CreateEntry("OverlayShowNames", true, description: "Show the marker name under an overlay icon while you look at it");
+        _overlayLookRadius = c.CreateEntry("OverlayLookRadius", 0.05f, description: "How close to screen center an icon must be to count as looked at (fraction of screen height)");
+        _overlayNameOpacity = c.CreateEntry("OverlayNameOpacity", 0.85f, description: "Opacity of the name label (0-1)");
         _overlaySize = c.CreateEntry("OverlaySize", 28f, description: "Overlay icon size in UI pixels");
         _chevronSize = c.CreateEntry("ChevronSize", 8f, description: "Chevron size in UI pixels");
     }

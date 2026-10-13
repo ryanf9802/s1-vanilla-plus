@@ -25,6 +25,8 @@ public static class Overlay
     private static Canvas _canvas;
     private static Il2CppTMPro.TextMeshProUGUI _nameLabel;
     private static RectTransform _nameRect;
+    private static int _nameKey;                                   // source id of the icon the name belongs to
+    private static readonly System.Collections.Generic.Dictionary<int, Vector3> FrameIconPos = new();
 
     public static int LastDrawn;
 
@@ -57,10 +59,11 @@ public static class Overlay
         Vector3 lift = new(0f, Settings.OverlayHeightFt / FeetPerUnit, 0f);
         Camera uiCam = _canvas.renderMode == RenderMode.ScreenSpaceOverlay ? null : _canvas.worldCamera;
 
+        FrameIconPos.Clear();
         int used = 0;
+        int lookKey = 0;
         string lookName = null;
-        Vector3 lookPos = Vector3.zero;
-        float lookAlpha = 0f, bestCenterDist = Settings.OverlayLookRadius * Screen.height;
+        float bestCenterDist = Settings.OverlayLookRadius * Screen.height;
         var screenCenter = new Vector2(Screen.width * 0.5f, Screen.height * 0.5f);
         foreach (var item in Items)
         {
@@ -75,32 +78,38 @@ public static class Overlay
             slot.Rt.sizeDelta = new Vector2(Settings.OverlaySize, Settings.OverlaySize);
             slot.Rt.localPosition = new Vector3(local.x, local.y, 0f);
 
+            FrameIconPos[item.Source.GetInstanceID()] = slot.Rt.localPosition;
+
             // The icon nearest screen center (within the look radius) is the one you are looking at.
             float cd = Vector2.Distance(new Vector2(sp.x, sp.y), screenCenter);
             if (item.Name != null && alpha > 0.05f && cd < bestCenterDist)
             {
                 bestCenterDist = cd;
                 lookName = item.Name;
-                lookPos = slot.Rt.localPosition;
-                lookAlpha = alpha * Settings.OverlayOpacity;
+                lookKey = item.Source.GetInstanceID();
             }
         }
-        UpdateNameLabel(lookName, lookPos, lookAlpha);
+        UpdateNameLabel(lookName, lookKey);
         Hide(used);
         LastDrawn = used;
     }
 
-    private static void UpdateNameLabel(string name, Vector3 iconPos, float iconAlpha)
+    private static void UpdateNameLabel(string name, int key)
     {
         if (_nameLabel == null) return;
         bool looking = name != null && Settings.OverlayShowNames;
         if (looking)
         {
+            _nameKey = key;
             if (_nameLabel.text != name) _nameLabel.text = name;
-            _nameRect.localPosition = iconPos + new Vector3(0f, -(Settings.OverlaySize * 0.5f + _nameLabel.fontSize * 0.7f), 0f);
         }
-        float goal = looking ? Mathf.Clamp01(iconAlpha / Mathf.Max(0.01f, Settings.OverlayOpacity)) * Settings.OverlayNameOpacity : 0f;
-        _nameLabel.alpha = Mathf.MoveTowards(_nameLabel.alpha, goal, Time.deltaTime * 6f);
+        // Keep following the icon the name belongs to while it fades out; if that icon is no longer drawn, just fade.
+        bool tracked = FrameIconPos.TryGetValue(_nameKey, out Vector3 iconPos);
+        if (tracked)
+            _nameRect.localPosition = iconPos + new Vector3(0f, -(Settings.OverlaySize * 0.5f + _nameLabel.fontSize * 0.7f), 0f);
+        float goal = looking ? Settings.OverlayNameOpacity : 0f;
+        float speed = tracked ? 6f : 20f;
+        _nameLabel.alpha = Mathf.MoveTowards(_nameLabel.alpha, goal, Time.deltaTime * speed);
     }
 
     private static void EnsureNameLabel(Il2CppTMPro.TMP_Text src)
@@ -114,7 +123,7 @@ public static class Overlay
         _nameLabel = go.AddComponent<Il2CppTMPro.TextMeshProUGUI>();
         _nameLabel.font = src.font;
         _nameLabel.fontSharedMaterial = src.fontSharedMaterial;
-        _nameLabel.fontSize = src.fontSize;
+        _nameLabel.fontSize = src.fontSize * Settings.OverlayNameScale;
         _nameLabel.color = src.color;
         _nameLabel.alignment = Il2CppTMPro.TextAlignmentOptions.Center;
         _nameLabel.raycastTarget = false;

@@ -7,7 +7,7 @@ public static class Settings
 {
     private static MelonPreferences_Entry<bool> _overlayQuestsOnly, _overlayShowNames;
     private static MelonPreferences_Entry<float> _fadeStartFt, _maxDistanceFt, _minAlpha, _facingAngle, _chevronThresholdFt, _chevronSize,
-        _overlayMaxFt, _overlayFadeStartFt, _overlayFadeEndFt, _overlayHeightFt, _overlaySize, _overlayOpacity, _overlayFadeInFt, _overlayLookRadius, _overlayNameOpacity;
+        _overlayMaxFt, _overlayFadeStartFt, _overlayFadeEndFt, _overlayHeightFt, _overlaySize, _overlayOpacity, _overlayFadeInFt, _overlayLookRadius, _overlayNameOpacity, _overlayNameScale;
 
     /// <summary>Markers closer than this many feet are fully opaque.</summary>
     public static float FadeStartFt => _fadeStartFt.Value;
@@ -36,6 +36,8 @@ public static class Settings
     public static float OverlayLookRadius => _overlayLookRadius.Value;
     /// <summary>Opacity of the name label at full strength (0-1).</summary>
     public static float OverlayNameOpacity => _overlayNameOpacity.Value;
+    /// <summary>Name label font size as a multiple of the compass distance label's.</summary>
+    public static float OverlayNameScale => _overlayNameScale.Value;
     /// <summary>Icons fade in from 0 to full over this many feet after entering OverlayMaxFt (so they don't pop in).</summary>
     public static float OverlayFadeInFt => _overlayFadeInFt.Value;
     /// <summary>Overall opacity of overlay icons (0-1), multiplied with the distance fade.</summary>
@@ -61,7 +63,8 @@ public static class Settings
         _overlayShowNames = c.CreateEntry("OverlayShowNames", true, description: "Show the marker name under an overlay icon while you look at it");
         _overlayLookRadius = c.CreateEntry("OverlayLookRadius", 0.05f, description: "How close to screen center an icon must be to count as looked at (fraction of screen height)");
         _overlayNameOpacity = c.CreateEntry("OverlayNameOpacity", 0.85f, description: "Opacity of the name label (0-1)");
-        _overlaySize = c.CreateEntry("OverlaySize", 28f, description: "Overlay icon size in UI pixels");
+        _overlayNameScale = c.CreateEntry("OverlayNameScale", 0.8f, description: "Name label font size relative to the compass distance label");
+        _overlaySize = c.CreateEntry("OverlaySize", 22f, description: "Overlay icon size in UI pixels");
         _chevronSize = c.CreateEntry("ChevronSize", 8f, description: "Chevron size in UI pixels");
     }
 }

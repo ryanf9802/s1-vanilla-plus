@@ -41,7 +41,7 @@ public static class Settings
         _minAlpha = c.CreateEntry("MinAlpha", 0.25f, description: "Opacity of markers at MaxDistanceFt (0-1)");
         _facingAngle = c.CreateEntry("FacingAngle", 6f, description: "Show distance only for markers within this many degrees of straight ahead");
         _chevronThresholdFt = c.CreateEntry("ChevronThresholdFt", 10f, description: "Show an up/down chevron when the target is at least this many feet above/below you");
-        _overlayMaxFt = c.CreateEntry("OverlayMaxFt", 50f, description: "Overlay icons (quest objectives) show within this many feet");
+        _overlayMaxFt = c.CreateEntry("OverlayMaxFt", 75f, description: "Overlay icons (quest objectives) show within this many feet");
         _overlayFadeStartFt = c.CreateEntry("OverlayFadeStartFt", 6f, description: "Overlay icons start fading out when closer than this many feet");
         _overlayFadeEndFt = c.CreateEntry("OverlayFadeEndFt", 2f, description: "Overlay icons are fully invisible at this many feet or closer");
         _overlayHeightFt = c.CreateEntry("OverlayHeightFt", 6.5f, description: "How many feet above the target the overlay icon floats");

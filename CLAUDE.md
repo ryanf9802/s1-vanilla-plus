@@ -37,6 +37,10 @@ The overall plan lives outside the repo at `~/.claude/plans/just-do-inspection-a
 - Ping raycast (`Ping/PingRaycast.cs`): the game disables the box colliders of distant buildings (active but `enabled=false` until you are within ~65 ft), so a plain `Physics.Raycast` passes through far buildings. `PingRaycast.Cast` also ray-tests those disabled map boxes (cached index of non-trigger BoxColliders under root `Map`, refreshed every 60 s) and takes the nearer hit.
 - Status: compiles; **not yet run in-game or with two players**. Known unknowns: whether the library adopts the game lobby by itself, whether legacy `Input` is usable (code falls back to the Input System), whether the synthesized sound respects the game's volume, and whether `AddElement` accepts the cloned icon as its content prefab.
 
+## DealWindow (in development, `.unreleased`)
+
+`DealWindow/` hides accepted customer deals (`Contract`, `DeliveryWindow` start/end HHMM) from the quest HUD, journal, map and compass until the window opens. Per-frame toggling in `DealHider` (no vanilla logic patched except two best-effort postfixes); findings in `docs/dealwindow.md`. Built, **not yet run in game**. `.unreleased` keeps `package_all.py` from packaging it; delete that file to ship.
+
 ## Settings and distribution
 
 - Settings (`Compass/Settings.cs`) follow the Mods App (k0Mods, github.com/k073l/s1-modsapp) conventions so it can show them in-game: every entry has a display name, description and, for numbers, a `ValueRange`; category identifiers start with the MelonInfo mod name (`Compass`, `Compass_Overlay`). Values are read live, so edits apply immediately. New settings must follow this pattern.

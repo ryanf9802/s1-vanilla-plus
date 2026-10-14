@@ -8,6 +8,7 @@ Vanilla+ quality-of-life mods for [Schedule I](https://store.steampowered.com/ap
 |---|---|---|
 | [Compass+](Compass/) | 0.3.0 | Distance fade, look-to-reveal distance labels, elevation chevrons and through-wall quest icons for the vanilla compass. |
 | [Ping](Ping/) | 0.3.0 (co-op testing in progress; co-op test pending) | Co-op ping on a keybind, in each player's color, shown on the compass and as a through-wall icon, with a sound. Needs Compass+. |
+| [DealWindow](DealWindow/) | 0.1.0 (in development, unreleased) | Accepted customer deals stay out of the quest HUD, journal, map and compass until their delivery window opens. |
 
 ## Installing
 

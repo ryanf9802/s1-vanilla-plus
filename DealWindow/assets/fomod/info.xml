@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<fomod>
+    <Name>DealWindow</Name>
+    <Author>ryanf9802</Author>
+    <Version>0.1.0</Version>
+    <Website>https://github.com/ryanf9802/s1-vanilla-plus</Website>
+    <Description>Customer deals stay out of the quest HUD, journal, map and compass until their delivery window opens.</Description>
+</fomod>

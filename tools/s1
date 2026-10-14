@@ -4,7 +4,7 @@
 #
 #   tools/s1 mark "<folder name>"   put the marker in that folder (and take it off any other)
 #   tools/s1 dir                    print the dev folder
-#   tools/s1 build [Compass|Ping|Portraits]   compile (default: all); never runs the template's post-build step
+#   tools/s1 build [Compass|Ping|Portraits|DealWindow]   compile (default: all); never runs the template's post-build step
 #   tools/s1 deploy                 close the dev game if running, copy the built DLLs into its Mods/UserLibs
 #   tools/s1 launch                 start the dev game with the MelonLoader console hidden
 #   tools/s1 kill                   close the dev game (only the process running from the dev folder)
@@ -41,7 +41,7 @@ case "$cmd" in
   dir) dev_dir; echo ;;
   build)
     dev=$(dev_dir)
-    mods=("${@:-Compass Ping Portraits}"); read -ra mods <<< "${mods[*]}"
+    mods=("${@:-Compass Ping Portraits DealWindow}"); read -ra mods <<< "${mods[*]}"
     for m in "${mods[@]}"; do
       echo "== build $m"
       ps "& 'C:\\Program Files\\dotnet\\dotnet.exe' build '$(win "$ROOT/$m/$m.csproj")' -c IL2CPP -p:S1DevDir='$dev' -p:RunPostBuildEvent=Never" | grep -E "error CS|error MSB|Build succeeded|FAILED" || true
@@ -58,6 +58,7 @@ case "$cmd" in
         Copy-Item '$(win "$ROOT/Ping/bin/IL2CPP/net6/Ping-IL2CPP.dll")' '$dev\\Mods\\Ping-IL2CPP.dll' -Force
         New-Item -ItemType Directory -Force '$dev\\UserLibs' | Out-Null
         if (Test-Path '$(win "$ROOT/Portraits/bin/IL2CPP/net6/Portraits-IL2CPP.dll")') { Copy-Item '$(win "$ROOT/Portraits/bin/IL2CPP/net6/Portraits-IL2CPP.dll")' '$dev\\Mods\\Portraits-IL2CPP.dll' -Force }
+        if (Test-Path '$(win "$ROOT/DealWindow/bin/IL2CPP/net6/DealWindow-IL2CPP.dll")') { Copy-Item '$(win "$ROOT/DealWindow/bin/IL2CPP/net6/DealWindow-IL2CPP.dll")' '$dev\\Mods\\DealWindow-IL2CPP.dll' -Force }
         Copy-Item '$(win "$ROOT/Ping/libs/SteamNetworkLib.dll")' '$dev\\UserLibs\\SteamNetworkLib-IL2Cpp.dll' -Force
         'deployed to $dev'"
     ;;

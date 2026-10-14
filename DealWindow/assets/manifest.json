@@ -1,0 +1,9 @@
+{
+    "name": "DealWindow",
+    "version_number": "0.1.0",
+    "website_url": "https://github.com/ryanf9802/s1-vanilla-plus",
+    "description": "Customer deals stay out of the quest HUD, journal, map and compass until their delivery window opens.",
+    "dependencies": [
+        "LavaGang-MelonLoader-0.7.3"
+    ]
+}

@@ -4,6 +4,8 @@ Vanilla+ quality-of-life mods for [Schedule I](https://store.steampowered.com/ap
 
 ## Mods
 
+The collection and each mod are versioned separately. The collection version (file `VERSION`, release tags, `S1VanillaPlus-<version>.zip`) goes up whenever any mod changes; a mod's own version only changes when that mod does. Each release's notes list which mod versions it contains.
+
 | Mod | Status | Description |
 |---|---|---|
 | [Compass+](Compass/) | 0.3.0 | Distance fade, look-to-reveal distance labels, elevation chevrons and through-wall quest icons for the vanilla compass. |
